@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Disaster Report</string>
+    <string name="open">open</string>
+    <string name="close">close</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Blank fragment</string>
+    <string-array name="mags">
+        <item>None</item>
+        <item>1.0+</item>
+        <item>2.0+</item>
+        <item>3.0+</item>
+        <item>4.0+</item>
+        <item>5.0+</item>
+        <item>6.0+</item>
+        <item>7.0+</item>
+        <item>8.0+</item>
+    </string-array>
+</resources>

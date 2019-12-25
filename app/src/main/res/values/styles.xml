@@ -1,0 +1,73 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="drawerArrowStyle">@style/DrawerIcon</item>
+        <item name="android:textColorHint">#8FFFFFFF</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
+
+    <style name="ActionBarThemeOverlay">
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:textColorPrimary">#FFF</item>
+        <item name="android:textColorSecondary">#fff</item>
+        <item name="searchViewStyle">@style/SearchViewStyle</item>
+    </style>
+
+    <style name="DrawerIcon" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">#FFF</item>
+    </style>
+
+    <style name="SettingsActivityTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="DetailsActivityTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:actionBarStyle">@style/DetailsActivityActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <!-- Support library compatibility -->
+        <item name="actionBarStyle">@style/DetailsActivityActionBar</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:titleTextStyle">@style/TitleTextStyle</item>
+        <!--        <item name="titleTextColor">@android:color/white</item>-->
+        <!--        <item name="subtitleTextColor">@android:color/white</item>-->
+        <!--        <item name="drawerArrowStyle">@style/DrawerIcon</item>-->
+        <!--        <item name="colorControlNormal">@android:color/white</item>-->
+    </style>
+
+    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <!-- Gets rid of the search icon -->
+        <item name="searchIcon">@drawable/ic_search_white</item>
+        <!-- Gets rid of the "underline" in the text -->
+        <item name="queryBackground">@color/colorPrimary</item>
+        <!-- Gets rid of the search icon when the SearchView is expanded -->
+        <item name="searchHintIcon">@null</item>
+        <item name="android:textColorHint">#FFFFFF</item>
+        <item name="collapseIcon">@drawable/ic_back_arrow</item>
+    </style>
+
+    <style name="TitleTextStyle" parent="@style/TextAppearance.AppCompat.Title">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">3</item>
+        <item name="android:shadowDy">3</item>
+        <item name="android:shadowRadius">1.5</item>
+    </style>
+
+
+    <style name="DetailsActivityActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:background">@null</item>
+        <!-- Support library compatibility -->
+        <item name="background">@null</item>
+    </style>
+
+</resources>

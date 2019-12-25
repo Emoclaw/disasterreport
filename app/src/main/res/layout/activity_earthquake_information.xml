@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cyanLight"
+    tools:context=".EarthquakeInformationActivity">
+
+    <Button
+        android:id="@+id/zoom_in_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/colorSecondary"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="+"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/mapView"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="UnusedAttribute" />
+
+    <Button
+        android:id="@+id/zoom_out_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/colorSecondary"
+        android:clickable="true"
+
+        android:focusable="true"
+        android:text="-"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/mapView"
+        app:layout_constraintEnd_toStartOf="@+id/zoom_in_button"
+        tools:ignore="UnusedAttribute" />
+
+    <ListView
+        android:id="@+id/earthquake_listView"
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:dividerHeight="1dip"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mapView" />
+
+    <TextView
+        android:id="@+id/probably_felt_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="24dp"
+        android:drawableLeft="@drawable/red_square"
+        android:shadowColor="#000000"
+        android:shadowDx="2.5"
+        android:shadowDy="2.3"
+        android:shadowRadius="3.6"
+        android:text=" Probably Perceptable"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/mapView"
+        app:layout_constraintEnd_toStartOf="@+id/zoom_out_button" />
+
+    <TextView
+        android:id="@+id/possibly_felt_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/orange_square"
+        android:shadowColor="#000000"
+        android:shadowDx="2.5"
+        android:shadowDy="2.3"
+        android:shadowRadius="3.6"
+        android:text=" Possibly Perceptable"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="@+id/probably_felt_textView"
+        app:layout_constraintTop_toBottomOf="@+id/probably_felt_textView" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        map:cameraZoom="2"
+        map:liteMode="true"
+        map:mapType="terrain" />
+</androidx.constraintlayout.widget.ConstraintLayout>
