@@ -45,7 +45,6 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
     GoogleMap gMap;
     private double km;
     private double selectedMinMag;
-    private LinearLayout dateLinearLayout;
     private double selectedMaxMag;
     private Circle circle;
     private EarthquakeFiltersDialogCompletedListener mListener;
@@ -89,7 +88,8 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
 
         startDate = System.currentTimeMillis() - 86400000L;
         endDate = System.currentTimeMillis() + 86400000L;
-        dateLinearLayout = view.findViewById(R.id.date_filter_layout);
+        TextView startDateTextView = view.findViewById(R.id.start_date_textView);
+        TextView endDateTextView = view.findViewById(R.id.end_date_textView);
         final TextView minMagTextView = view.findViewById(R.id.min_mag_textView);
         final TextView maxMagTextView = view.findViewById(R.id.max_mag_textView);
         RadioButton Last24HoursRadio = view.findViewById(R.id.last_24_earthquake);
@@ -104,17 +104,20 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
                         selectedDateRadio = 0;
                         startDate = System.currentTimeMillis() - 86400000L;
                         endDate = System.currentTimeMillis() + 86400000L;
-                        dateLinearLayout.setVisibility(View.INVISIBLE);
+                        startDateTextView.setVisibility(View.INVISIBLE);
+                        endDateTextView.setVisibility(View.INVISIBLE);
                         break;
                     case R.id.this_week_earthquake:
                         selectedDateRadio = 1;
                         startDate = System.currentTimeMillis() - 7 * 86400000L;
                         endDate = System.currentTimeMillis() + 86400000L;
-                        dateLinearLayout.setVisibility(View.INVISIBLE);
+                        startDateTextView.setVisibility(View.INVISIBLE);
+                        endDateTextView.setVisibility(View.INVISIBLE);
                         break;
                     case R.id.custom_earthquake:
                         selectedDateRadio = 2;
-                        dateLinearLayout.setVisibility(View.VISIBLE);
+                        startDateTextView.setVisibility(View.VISIBLE);
+                        endDateTextView.setVisibility(View.VISIBLE);
                         break;
                 }
             }
@@ -194,7 +197,8 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
                     CustomRadio.setChecked(true);
                     String startDateString = format.format(new Date(startDate));
                     String endDateString = format.format(new Date(endDate));
-                    dateLinearLayout.setVisibility(View.VISIBLE);
+                    startDateTextView.setVisibility(View.VISIBLE);
+                    endDateTextView.setVisibility(View.VISIBLE);
                     startDateTextView.setText(startDateString);
                     endDateTextView.setText(endDateString);
 
@@ -203,9 +207,11 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
             }
             //Adjust DatePicker visibilities based on whether 'Custom' date is selected
             if (!CustomRadio.isChecked()) {
-                dateLinearLayout.setVisibility(View.INVISIBLE);
+                startDateTextView.setVisibility(View.INVISIBLE);
+                endDateTextView.setVisibility(View.INVISIBLE);
             } else {
-                dateLinearLayout.setVisibility(View.VISIBLE);
+                startDateTextView.setVisibility(View.VISIBLE);
+                endDateTextView.setVisibility(View.VISIBLE);
             }
         }
         //Minimum Magnitude SeekBar Listener
@@ -325,12 +331,14 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         if (gMap != null) {
             if (km < 400) {
                 gMap.moveCamera(CameraUpdateFactory.zoomTo(6));
-            } else if (km > 400 && km < 1500) {
+            } else if (km < 1500) {
                 gMap.moveCamera(CameraUpdateFactory.zoomTo(4));
-            } else if (km > 1500 && km < 2500) {
+            } else if (km < 2500) {
                 gMap.moveCamera(CameraUpdateFactory.zoomTo(3));
-            } else {
+            } else if (km < 5000){
                 gMap.moveCamera(CameraUpdateFactory.zoomTo(1));
+            } else {
+                gMap.moveCamera(CameraUpdateFactory.zoomTo(0));
             }
         }
     }
