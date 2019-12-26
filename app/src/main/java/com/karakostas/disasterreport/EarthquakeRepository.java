@@ -8,21 +8,14 @@ import java.util.List;
 
 public class EarthquakeRepository {
     private EarthquakeDao earthquakeDao;
-    private LiveData<List<Earthquake>> mAllEarthquakes;
-    private LiveData<List<Earthquake>> mFilteredEarthquakes;
-
     EarthquakeRepository(Application application) {
         DisasterRoomDatabase db = DisasterRoomDatabase.getDatabase(application);
         earthquakeDao = db.earthquakeDao();
-        mAllEarthquakes = earthquakeDao.getAllEarthquakes();
-
     }
 
-    LiveData<List<Earthquake>> getAllEarthquakes() {
-        return mAllEarthquakes;
-    }
 
     LiveData<List<Earthquake>> getFilteredEarthquakes(double minMag, double maxMag, long startDate, long endDate, double circleRadius, String searchQuery) {
+        LiveData<List<Earthquake>> mFilteredEarthquakes;
         if (searchQuery.equals("")) {
             mFilteredEarthquakes = earthquakeDao.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius);
         } else {

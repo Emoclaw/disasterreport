@@ -38,8 +38,6 @@ import icepick.State;
 
 import java.util.concurrent.TimeUnit;
 
-import static java.util.concurrent.TimeUnit.HOURS;
-
 public class MainActivity extends AppCompatActivity implements EarthquakeFiltersDialog.EarthquakeFiltersDialogCompletedListener {
     public static final Boolean DEBUG_MODE = false;
     @State

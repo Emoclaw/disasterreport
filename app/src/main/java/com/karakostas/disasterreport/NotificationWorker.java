@@ -16,6 +16,8 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 
@@ -24,14 +26,13 @@ public class NotificationWorker extends Worker {
         super(context, workerParams);
     }
 
-    private EarthquakeRepository mRepository;
-
     @NonNull
     @Override
     public Result doWork() {
-        long startDate = System.currentTimeMillis() - 86400000L;
-        long endDate = System.currentTimeMillis() + 86400000L;
-
+        createNotificationChannel();
+        EarthquakeDao dao = DisasterRoomDatabase.getDatabase(getApplicationContext()).earthquakeDao();
+        long startDate = System.currentTimeMillis() - 4*3600000L;
+        long endDate = System.currentTimeMillis() + 3600000L;
         TimeZone timeZone = TimeZone.getDefault();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
         format.setTimeZone(timeZone);
@@ -41,8 +42,8 @@ public class NotificationWorker extends Worker {
         String latitudeString = Double.toString(mLatitude);
         double mLongitude = (getInputData().getDouble("longitude",0));
         String longitudeString = Double.toString(mLongitude);
-        String data = NetworkUtilities.getEarthquakeData(startDateString,endDateString,"2.0","11.0",latitudeString,longitudeString,"180");
-
+        String data = NetworkUtilities.getEarthquakeData(startDateString,endDateString,"0.0","11.0",latitudeString,longitudeString,"180");
+        List<Earthquake> mList = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(data);
             final JSONArray earthquakesArray = jsonObject.getJSONArray("features");
@@ -63,20 +64,30 @@ public class NotificationWorker extends Worker {
                 double distanceFromUser = NetworkUtilities.HaversineInKM(latitude, longitude, mLatitude, mLongitude);
                 if (MainActivity.DEBUG_MODE)
                     Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + mLatitude + " UserLongitude: " + mLongitude);
+                mList.add(new Earthquake(location,timeInMs,mag,detailsURL,id,latitude,longitude,distanceFromUser));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        createNotificationChannel();
+
+        for (int i = mList.size() - 1; i > 0; i--) {
+            if (dao.findEarthquakeById(mList.get(i).getId()) == null) {
+                createNotification(mList.get(i).getLocation(), "An eartquake with magnitude of " + mList.get(i).getMag() + " has occurred");
+                dao.insert(mList.get(i));
+            }
+        }
+        return Result.success();
+    }
+    private void createNotification(String title, String text){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),"1")
                 .setSmallIcon(R.drawable.mag_icon)
-                .setContentTitle("sdfasdf")
-                .setContentText("asdgffdgsfg")
+                .setContentTitle(title)
+                .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
         NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
         manager.notify(1,builder.build());
-        return Result.success();
     }
+
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
