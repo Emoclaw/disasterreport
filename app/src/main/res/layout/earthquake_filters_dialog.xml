@@ -9,25 +9,38 @@
     android:minWidth="400dp"
     android:minHeight="400dp"
     android:orientation="vertical">
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Earthquake Filters"
+        android:textColor="#ffffff"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/magnitude_textView_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Magnitude"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
-        <SeekBar
-            android:id="@+id/min_mag_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            android:max="110"
-            app:layout_constraintStart_toEndOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/magnitude_textView_filter" />
-
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="4dp"
@@ -35,54 +48,93 @@
 
         <TextView
             android:id="@+id/min_mag_textView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintStart_toEndOf="@+id/min_mag_seekbar"
-            app:layout_constraintTop_toTopOf="@+id/min_mag_seekbar"
+            android:layout_weight="1"
             tools:text="0.0" />
+        <SeekBar
+            android:id="@+id/min_mag_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_weight="10"
+            android:max="110"
+            tools:progress="50" />
+
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:orientation="horizontal">
-
-        <SeekBar
-            android:id="@+id/max_mag_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            android:max="110"
-            android:progress="110"
-            app:layout_constraintStart_toEndOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/magnitude_textView_filter" />
-
         <TextView
             android:id="@+id/textView3"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:layout_weight="1"
             android:layout_marginTop="4dp"
             android:text="Max" />
 
         <TextView
             android:id="@+id/max_mag_textView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintStart_toEndOf="@+id/min_mag_seekbar"
-            app:layout_constraintTop_toTopOf="@+id/min_mag_seekbar"
             tools:text="0.0" />
-
+        <SeekBar
+            android:id="@+id/max_mag_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_weight="10"
+            android:max="110"
+            android:progress="110" />
     </LinearLayout>
+    <TextView
 
+        android:id="@+id/date_textView_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Date"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+    <RadioGroup
+        android:id="@+id/date_radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/last_24_earthquake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Last 24 hours" />
+
+        <RadioButton
+            android:id="@+id/this_week_earthquake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last 7 days" />
+
+        <RadioButton
+            android:id="@+id/custom_earthquake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Custom" />
+
+    </RadioGroup>
     <LinearLayout
         android:id="@+id/date_filter_layout"
         android:layout_width="wrap_content"
@@ -122,6 +174,15 @@
         android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
         <ImageView
             android:id="@+id/info_imageView"
             android:layout_width="wrap_content"
@@ -131,14 +192,6 @@
             android:clickable="true"
             android:src="@drawable/ic_info"
             android:visibility="gone" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Location"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -168,100 +221,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/earthquake_filters_ok_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:background="@color/colorSecondary"
 
-            android:text="OK"
-            android:textColor="#ffffff" />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/distance_textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="Distance: Max/No Filter" />
-    </LinearLayout>
-
-    <RadioGroup
-        android:id="@+id/date_radioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/last_24_earthquake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Last 24 hours" />
-
-        <RadioButton
-            android:id="@+id/this_week_earthquake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last 7 days" />
-
-        <RadioButton
-            android:id="@+id/custom_earthquake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Custom" />
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/colorPrimary"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:text="Earthquake Filters"
-        android:textColor="#ffffff"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-
-        android:id="@+id/magnitude_textView_filter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Magnitude"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <TextView
-
-        android:id="@+id/date_textView_filter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Date"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
 
 
     <com.google.android.gms.maps.MapView xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -273,5 +236,33 @@
         map:cameraZoom="1"
         map:liteMode="true"
         map:mapType="normal" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/distance_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Distance: Max/No Filter" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/earthquake_filters_ok_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@color/colorSecondary"
+
+            android:text="OK"
+            android:textColor="#ffffff" />
+    </LinearLayout>
 
 </LinearLayout>
