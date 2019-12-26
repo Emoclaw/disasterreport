@@ -3,6 +3,7 @@ package com.karakostas.disasterreport;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -25,10 +26,19 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.navigation.NavigationView;
 import icepick.State;
+
+import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.HOURS;
 
 public class MainActivity extends AppCompatActivity implements EarthquakeFiltersDialog.EarthquakeFiltersDialogCompletedListener {
     public static final Boolean DEBUG_MODE = false;
@@ -190,6 +200,21 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         setupDrawerContent(navigationView);
         selectDrawerItem(navigationView.getMenu().getItem(0));
         getSupportActionBar().setHomeButtonEnabled(true);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean enableNotifications = sharedPref.getBoolean("notification_switch",false);
+        if (enableNotifications) {
+            Data locationData = new Data.Builder()
+                    .putDouble("latitude",mLatitude)
+                    .putDouble("longitude",mLongitude)
+                    .build();
+            PeriodicWorkRequest work = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
+                    .addTag("notificationWorkTag")
+                    .setInputData(locationData)
+                    .build();
+            WorkManager.getInstance(this).enqueueUniquePeriodicWork("notificationWork", ExistingPeriodicWorkPolicy.KEEP, work);
+        } else {
+            WorkManager.getInstance(this).cancelUniqueWork("notificationWork");
+        }
     }
 
     public void setupDrawerContent(NavigationView navigationView) {

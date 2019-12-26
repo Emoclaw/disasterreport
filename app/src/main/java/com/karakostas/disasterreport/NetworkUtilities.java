@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -85,7 +86,7 @@ class NetworkUtilities {
         return null;
     }
 
-    static String earthquakeDetails(String URL) {
+    static String getEarthquakeDetails(String URL) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String earthquakeDetailsJSONData;
@@ -133,7 +134,7 @@ class NetworkUtilities {
         return null;
     }
 
-    public static String timeToString(long time) {
+    static String timeToString(long time) {
         String dateFinal;
         long currentTime = System.currentTimeMillis();
         TimeZone.setDefault(null);

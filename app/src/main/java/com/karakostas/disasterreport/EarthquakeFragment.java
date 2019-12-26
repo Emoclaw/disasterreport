@@ -47,12 +47,7 @@ import java.util.TimeZone;
  * A simple {@link Fragment} subclass.
  */
 public class EarthquakeFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>, MainActivity.sendDataToFragment {
-    private static final String LIST_KEY = "earthquakeList";
     List<Earthquake> mList = new ArrayList<>();
-    @State
-    ArrayList<Earthquake> mListCopy = new ArrayList<>();
-    @State
-    ArrayList<Earthquake> filteredList = new ArrayList<>();
     @State
     double minMag = 2;
     @State

@@ -3,6 +3,6 @@
     <androidx.preference.SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="notification_switch"
-        android:summary="Turn this option on or off"
+        android:summary=""
         android:title="Enable Notifications" />
 </androidx.preference.PreferenceScreen>
