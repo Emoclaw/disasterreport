@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             permissionDialog.setTitle("Location Permission");
             permissionDialog.setCancelable(false);
             permissionDialog.setPositiveButton("OK", (dialogInterface, i) -> ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                     0));
             permissionDialog.setNegativeButton("EXIT", (dialogInterface, i) -> finish());
             AlertDialog permissionExplanationDialog = permissionDialog.create();
