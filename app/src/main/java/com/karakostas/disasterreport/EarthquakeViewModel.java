@@ -2,7 +2,6 @@ package com.karakostas.disasterreport;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.*;
 
 import java.util.List;
@@ -21,12 +20,7 @@ public class EarthquakeViewModel extends AndroidViewModel {
         super(application);
         mRepository = new EarthquakeRepository(application);
         earthquakeFilter = new MediatorLiveData<>();
-        mFilteredEarthquakes = Transformations.switchMap(earthquakeFilter, new Function<EarthquakeViewModel.earthquakeFilter, LiveData<List<Earthquake>>>() {
-            @Override
-            public LiveData<List<Earthquake>> apply(EarthquakeViewModel.earthquakeFilter input) {
-                return mRepository.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius, searchQuery);
-            }
-        });
+        mFilteredEarthquakes = Transformations.switchMap(earthquakeFilter, input -> mRepository.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius, searchQuery));
 
     }
 
@@ -38,7 +32,7 @@ public class EarthquakeViewModel extends AndroidViewModel {
         return mFilteredEarthquakes;
     }
 
-    public void setFilters(double minMag, double maxMag, long startDate, long endDate, double circleRadius, String searchQuery) {
+    void setFilters(double minMag, double maxMag, long startDate, long endDate, double circleRadius, String searchQuery) {
         this.circleRadius = circleRadius;
         this.minMag = minMag;
         this.maxMag = maxMag;
@@ -48,8 +42,10 @@ public class EarthquakeViewModel extends AndroidViewModel {
         earthquakeFilter filter = new earthquakeFilter(minMag, maxMag, startDate, endDate, searchQuery);
         earthquakeFilter.setValue(filter);
     }
-
-    public void insert(Earthquake earthquake) {
+    void search(String s){
+        setFilters(minMag,maxMag,startDate,endDate, circleRadius,s);
+    }
+    void insert(Earthquake earthquake) {
         mRepository.insert(earthquake);
     }
 

@@ -21,14 +21,9 @@ allprojects {
         google()
         jcenter()
         maven { url "https://jitpack.io" }
-        maven { url "https://clojars.org/repo/" }
     }
 
 }
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-ext {
-    roomVersion = '2.2.3'
-    archLifecycleVersion = '2.2.0-rc03'
 }

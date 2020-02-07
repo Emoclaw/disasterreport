@@ -1,14 +1,10 @@
 package com.karakostas.disasterreport;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
@@ -34,36 +30,18 @@ import androidx.work.WorkManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.navigation.NavigationView;
-import icepick.State;
 
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements EarthquakeFiltersDialog.EarthquakeFiltersDialogCompletedListener {
-    public static final Boolean DEBUG_MODE = false;
-    @State
-    public double mLatitude;
-    @State
-    public double mLongitude;
-    @State
-    double minMag = 2;
-    @State
-    double maxMag = 11;
-    @State
-    int mSelectedDateRadio;
-    @State
-    long mStartDate;
-    @State
-    long mEndDate;
-    @State
-    double mMaxRadius = 180;
-    @State
-    String mSearchQuery;
-    SearchView searchView;
-    MenuItem searchMenuItem;
-    private Toolbar toolbar;
+    static final Boolean DEBUG_MODE = true;
+    private SharedPreferences earthquakePrefs;
+    private SharedPreferences.Editor earthquakePrefEditor;
+
+    private SearchView searchView;
+    private MenuItem searchMenuItem;
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
     private FragmentManager fm;
     private FusedLocationProviderClient fusedLocationClient;
     private sendDataToFragment s;
@@ -72,7 +50,16 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_filter) {
-            showDialog();
+            float minMag = earthquakePrefs.getFloat("min_mag",2);
+            float maxMag = earthquakePrefs.getFloat("max_mag",11);
+            int selectedDateRadio = earthquakePrefs.getInt("selected_date_radio",0);
+            long startDate = earthquakePrefs.getLong("start_date",System.currentTimeMillis() - 86400000L);
+            long endDate = earthquakePrefs.getLong("end_date",System.currentTimeMillis() + 86400000L);
+            float maxRadius = earthquakePrefs.getFloat("max_radius",180);
+            showDialog(minMag,maxMag,selectedDateRadio,startDate,
+                    endDate,maxRadius,
+                    Double.longBitsToDouble(earthquakePrefs.getLong("location_latitude",0)),
+                    Double.longBitsToDouble(earthquakePrefs.getLong("location_longitude",0)));
         }
         if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -80,15 +67,15 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         return super.onOptionsItemSelected(item);
     }
 
-    private void showDialog() {
+    private void showDialog(float minMag, float maxMag, int mSelectedDateRadio, long mStartDate, long mEndDate, float mMaxRadius, double mLatitude, double mLongitude) {
         EarthquakeFiltersDialog earthquakeFiltersDialog = EarthquakeFiltersDialog.newInstance("Title");
         Bundle args = new Bundle();
-        args.putDouble("minMagPos", minMag);
-        args.putDouble("maxMagPos", maxMag);
+        args.putFloat("minMagPos", minMag);
+        args.putFloat("maxMagPos", maxMag);
         args.putInt("dateRadio", mSelectedDateRadio);
         args.putLong("startDate", mStartDate);
         args.putLong("endDate", mEndDate);
-        args.putDouble("maxradius", mMaxRadius);
+        args.putFloat("maxradius", mMaxRadius);
         args.putDouble("latitude", mLatitude);
         args.putDouble("longitude", mLongitude);
         earthquakeFiltersDialog.setArguments(args);
@@ -101,41 +88,22 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
 
         searchMenuItem = menu.findItem(R.id.action_earthquake_search);
         searchView = (SearchView) searchMenuItem.getActionView();
-        searchView.setQueryHint("Type & Press search icon on your keyboard");
+        searchView.setQueryHint("Search");
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Toast like print
-
-//                if(!searchView.isIconified()) {
-//                    searchView.setIconified(true);
-//                }
-//                searchMenuItem.collapseActionView();
-
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
-
-                if (s.equals("")) {
-                    MainActivity.this.s.sendEarthquakeSearchQuery(s);
-                } else {
-                    MainActivity.this.s.sendEarthquakeSearchQuery(s);
-                }
+                MainActivity.this.s.sendEarthquakeSearchQuery(s);
                 return false;
             }
         });
-        if (mSearchQuery != null && !mSearchQuery.equals("")) {
-            searchView.setIconified(false);
-            String tempQuery = mSearchQuery;
-            searchMenuItem.expandActionView();
-
-            searchView.clearFocus();
-            searchView.setQuery(tempQuery, false);
-        } else if (searchView != null) {
+        if (searchView != null) {
             searchView.setIconified(true);
         }
         return true;
@@ -165,8 +133,6 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         setContentView(R.layout.activity_main);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        mStartDate = System.currentTimeMillis() - 86400000L;
-        mEndDate = System.currentTimeMillis() + 86400000L;
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder permissionDialog = new AlertDialog.Builder(MainActivity.this);
             permissionDialog.setMessage("Disaster Report needs to access your location in order to " +
@@ -185,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         }
         fm = getSupportFragmentManager();
 
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -194,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
 
         drawerToggle.syncState();
         drawerLayout.addDrawerListener(drawerToggle);
-        navigationView = findViewById(R.id.navigation);
+        NavigationView navigationView = findViewById(R.id.navigation);
         setupDrawerContent(navigationView);
         selectDrawerItem(navigationView.getMenu().getItem(0));
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -202,8 +168,9 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         boolean enableNotifications = sharedPref.getBoolean("notification_switch",false);
         if (enableNotifications) {
             Data locationData = new Data.Builder()
-                    .putDouble("latitude",mLatitude)
-                    .putDouble("longitude",mLongitude)
+                    //Since latitude and longitude are stored as raw long bits, convert them back to double
+                    .putDouble("latitude",Double.longBitsToDouble(earthquakePrefs.getLong("location_latitude",0)))
+                    .putDouble("longitude",Double.longBitsToDouble(earthquakePrefs.getLong("location_longitude",0)))
                     .build();
             PeriodicWorkRequest work = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
                     .addTag("notificationWorkTag")
@@ -213,20 +180,19 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         } else {
             WorkManager.getInstance(this).cancelUniqueWork("notificationWork");
         }
+        earthquakePrefs = getApplicationContext().getSharedPreferences("EarthquakeFilterPrefs",0);
+        earthquakePrefEditor = earthquakePrefs.edit();
     }
 
-    public void setupDrawerContent(NavigationView navigationView) {
+    private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                        MainActivity.this.selectDrawerItem(menuItem);
-                        return true;
-                    }
+                menuItem -> {
+                    MainActivity.this.selectDrawerItem(menuItem);
+                    return true;
                 });
     }
 
-    public void selectDrawerItem(MenuItem menuItem) {
+    private void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         Fragment fragment = null;
 
@@ -261,106 +227,78 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragment != null) {
             fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
-            // Highlight the selected item has been done by NavigationView
+            // Highlight the selected item
             menuItem.setChecked(true);
             drawerLayout.closeDrawer(Gravity.LEFT, false);
         }
-
-
-        // Set action bar title
         setTitle(menuItem.getTitle());
-        // Close the navigation drawer
-
     }
 
     //Implement EarthquakeFiltersDialogCompletedListener's onEarthquakeDialogComplete method to receive the data
     @Override
-    public void onEarthquakeDialogComplete(double selectedMinMag, double selectedMaxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, double maxradius) {
-        minMag = selectedMinMag;
-        maxMag = selectedMaxMag;
-        mSelectedDateRadio = selectedDateRadio;
-        mStartDate = startDate;
-        mMaxRadius = maxradius;
-        mLatitude = latitude;
-        mLongitude = longitude;
-        mEndDate = endDate;
+    public void onEarthquakeDialogComplete(float selectedMinMag, float selectedMaxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, float maxradius) {
         searchMenuItem.collapseActionView();
         if (!searchView.isIconified()) {
             searchView.setIconified(true);
         }
-
+        //Save the data using SharedPreferences. We can cast double to float here because precision isn't important.
+        earthquakePrefEditor.putFloat("min_mag", selectedMinMag);
+        earthquakePrefEditor.putFloat("max_mag", selectedMaxMag);
+        earthquakePrefEditor.putInt("selected_date_radio",selectedDateRadio);
+        earthquakePrefEditor.putLong("start_date",startDate);
+        earthquakePrefEditor.putLong("end_date",endDate);
+        earthquakePrefEditor.putFloat("max_radius",maxradius);
+        earthquakePrefEditor.commit();
         //Send the data to the EarthquakeFragment
-
-        s.sendData(minMag, maxMag, mSelectedDateRadio, mStartDate, mEndDate, mLatitude, mLongitude, mMaxRadius, false);
-        s.startFetching();
+        s.sendData(selectedMinMag, selectedMaxMag, startDate, endDate, latitude, longitude, maxradius);
 
     }
 
     //Since we can't obtain fragment from viewPager, call this method from the fragment.
-    public void setSendDataToFragmentListener(sendDataToFragment listener) {
+    void setSendDataToFragmentListener(sendDataToFragment listener) {
         this.s = listener;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case 0: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    fusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(this, location -> {
-                                // Got last known location. In some rare situations this can be null.
-                                if (location != null) {
-                                    // Logic to handle location object
-                                    s.sendData(minMag, maxMag, mSelectedDateRadio, mStartDate, mEndDate, location.getLatitude(), location.getLongitude(), mMaxRadius, true);
-                                } else {
-                                    LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-                                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
-                                            @Override
-                                            public void onLocationChanged(Location location) {
-                                                mLatitude = location.getLatitude();
-                                                mLongitude = location.getLongitude();
-                                            }
-
-                                            @Override
-                                            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-                                            }
-
-                                            @Override
-                                            public void onProviderEnabled(String s) {
-
-                                            }
-
-                                            @Override
-                                            public void onProviderDisabled(String s) {
-
-                                            }
-                                        });
-                                    }
-                                }
-                            });
+                    getLocationToPrefs();
                 } else {
                     Toast.makeText(MainActivity.this, "You need to enable Location permission. Exiting...", Toast.LENGTH_LONG).show();
                     finish();
                 }
-                return;
             }
-
             // other 'case' lines to check for other
             // permissions this app might request.
         }
     }
-
-    //Create interface to send data from DialogFragment, called from this activity, to a fragment
+    private void getLocationToPrefs(){
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        //Since Editor doesn't have putDouble, convert Double to it's raw long bits
+                        //We don't use putFloat as we can lose precision, and putString is inefficient
+                        earthquakePrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
+                        earthquakePrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
+                        earthquakePrefEditor.commit();
+                        s.sendData(2, 11, System.currentTimeMillis() - 86400000L, System.currentTimeMillis() + 86400000L, location.getLatitude(), location.getLongitude(), 180);
+                        //If last known location is null, make a new request
+                    } else {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            getLocationToPrefs();
+                        }
+                    }
+                });
+    }
+    //Create interface to send data from EarthquakeFiltersDialog, called from this activity, to a EarthquakeFragment
     public interface sendDataToFragment {
-        void sendData(double z, double maxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, double maxradius, boolean clearDatabase);
-
+        void sendData(double z, double maxMag, long startDate, long endDate, double latitude, double longitude, float maxradius);
         void sendEarthquakeSearchQuery(String searchQuery);
-
-        void startFetching();
     }
 }

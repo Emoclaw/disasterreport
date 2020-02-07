@@ -1,13 +1,9 @@
 package com.karakostas.disasterreport;
 
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -27,10 +23,7 @@ import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import icepick.State;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,31 +40,14 @@ import java.util.TimeZone;
  * A simple {@link Fragment} subclass.
  */
 public class EarthquakeFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>, MainActivity.sendDataToFragment {
-    List<Earthquake> mList = new ArrayList<>();
-    @State
-    double minMag = 2;
-    @State
-    double maxMag = 11;
-    @State
-    long mStartDate = 0;
-    @State
-    long mEndDate = 0;
-    @State
-    double mMaxRadius = 180;
-    @State
-    double mLatitude;
-    @State
-    double mLongitude;
+    private List<Earthquake> mList = new ArrayList<>();
     private Context mContext;
-    private DateFormat format;
     private EarthquakeViewModel earthquakeViewModel;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EarthquakeAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private String mSearchQuery = "";
-
+    SharedPreferences pref;
     public EarthquakeFragment() {
         // Required empty public constructor
     }
@@ -93,37 +69,37 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
 
     }
 
-    public boolean isConnected(Context context) {
+    private boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 //        mSwipeRefreshLayout.setRefreshing(false);
         return networkInfo != null && networkInfo.isConnected();
     }
 
-    public void fetchData() {
+    private void fetchData(double minMag, double maxMag, long startDate, long endDate, double latitude, double longitude, float maxradius) {
         mSwipeRefreshLayout.setRefreshing(true);
-        if (isConnected(mContext)) {
+        if (isConnected()) {
             Bundle queryBundle = new Bundle();
-            String startDate = "";
-            String endDate = "";
+            String stringStartDate = "";
+            String stringEndDate = "";
             TimeZone timeZone = TimeZone.getDefault();
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
             format.setTimeZone(timeZone);
-            startDate = format.format(new Date(mStartDate));
-            endDate = format.format(new Date(mEndDate));
+            stringStartDate = format.format(new Date(startDate));
+            stringEndDate = format.format(new Date(endDate));
             String minimumMagnitude = Double.toString(minMag);
             String maximumMagnitude = Double.toString(maxMag);
-            String latitude = Double.toString(mLatitude);
-            String longitude = Double.toString(mLongitude);
-            String maxradius = Double.toString(mMaxRadius);
-            Log.d("COORDINATESRadius", maxradius);
-            queryBundle.putString("startDate", startDate);
-            queryBundle.putString("endDate", endDate);
+            String stringLatitude = Double.toString(latitude);
+            String stringLongitude = Double.toString(longitude);
+            String stringMaxRadius = Float.toString(maxradius);
+            Log.d("COORDINATESRadius", stringMaxRadius);
+            queryBundle.putString("startDate", stringStartDate);
+            queryBundle.putString("endDate", stringEndDate);
             queryBundle.putString("minMag", minimumMagnitude);
             queryBundle.putString("maxMag", maximumMagnitude);
-            queryBundle.putString("latitude", latitude);
-            queryBundle.putString("longitude", longitude);
-            queryBundle.putString("maxradius", maxradius);
+            queryBundle.putString("latitude", stringLatitude);
+            queryBundle.putString("longitude", stringLongitude);
+            queryBundle.putString("maxradius", stringMaxRadius);
             mRecyclerView.setVisibility(View.VISIBLE);
             LoaderManager.getInstance(this).restartLoader(0, queryBundle, this);
         } else {
@@ -144,7 +120,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
                 //Toast.makeText(mContext,"Latitude: " + currentEarthquake.getLatitude() + " Longitude" + currentEarthquake.getLongitude(),Toast.LENGTH_LONG).show();
-                if (isConnected(mContext)) {
+                if (isConnected()) {
                     Earthquake currentEarthquake = mList.get(position);
                     String detailsURL = currentEarthquake.getURL();
                     Intent intent = new Intent(mContext, EarthquakeInformationActivity.class);
@@ -160,35 +136,15 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipe);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorPrimary), ContextCompat.getColor(mContext, R.color.colorSecondary));
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                fetchData();
-            }
-        });
         FloatingActionButton fab = view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                LinearSmoothScroller linearSmoothScroller = new LinearSmoothScroller(mRecyclerView.getContext()) {
-//                    @Override
-//                    protected float calculateSpeedPerPixel(DisplayMetrics displayMetrics) {
-//                        return 12f / displayMetrics.densityDpi;
-//                    }
-//                };
-//                linearSmoothScroller.setTargetPosition(0);
-//                mLayoutManager.startSmoothScroll(linearSmoothScroller);
-                mLayoutManager.scrollToPosition(0);
-            }
-
-        });
+        fab.setOnClickListener(view1 -> mLayoutManager.scrollToPosition(0));
         mRecyclerView.setHasFixedSize(true);
 
         mAdapter = new EarthquakeAdapter();
-        mStartDate = System.currentTimeMillis() - 86400000L;
-        mEndDate = System.currentTimeMillis() + 86400000L;
+        long startDate = System.currentTimeMillis() - 86400000L;
+        long endDate = System.currentTimeMillis() + 86400000L;
         earthquakeViewModel = new ViewModelProvider(this).get(EarthquakeViewModel.class);
-        earthquakeViewModel.setFilters(minMag, maxMag, mStartDate, mEndDate, mMaxRadius, "");
+        earthquakeViewModel.setFilters(2, 11, startDate, endDate, 180, "");
         earthquakeViewModel.getFilteredEarthquakes().observe(getViewLifecycleOwner(), new Observer<List<Earthquake>>() {
             @Override
             public void onChanged(List<Earthquake> earthquakes) {
@@ -199,41 +155,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         });
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                this.mLatitude = location.getLatitude();
-                this.mLongitude = location.getLongitude();
-            } else {
-                LocationManager mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
-                        @Override
-                        public void onLocationChanged(Location location) {
-                            mLatitude = location.getLatitude();
-                            mLongitude = location.getLongitude();
-                        }
-
-                        @Override
-                        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-                        }
-
-                        @Override
-                        public void onProviderEnabled(String s) {
-
-                        }
-
-                        @Override
-                        public void onProviderDisabled(String s) {
-
-                        }
-                    });
-                }
-            }
-        });
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            fetchData();
+        pref = mContext.getSharedPreferences("EarthquakeFilterPrefs",0);
     }
 
     @Override
@@ -245,6 +167,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         if (mainActivity != null) {
             mainActivity.setSendDataToFragmentListener(this);
         }
+
         return inflater.inflate(R.layout.fragment_earthquake, container, false);
 
     }
@@ -280,68 +203,38 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         } else {
             mSwipeRefreshLayout.setRefreshing(false);
             int i = 0;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        JSONObject jsonObject = new JSONObject(data);
-                        final JSONArray earthquakesArray = jsonObject.getJSONArray("features");
-                        String location;
-                        for (int i = 0; i < earthquakesArray.length(); i++) {
-                            JSONObject earthquake = earthquakesArray.getJSONObject(i);
-                            JSONObject properties = earthquake.getJSONObject("properties");
-                            long timeInMs = properties.getLong("time");
-                            location = properties.getString("place");
-                            double mag = properties.getDouble("mag");
-                            mag = Math.round(mag * 10) / 10d;
-                            String detailsURL = properties.getString("detail");
-                            String id = earthquake.getString("id");
-                            JSONObject geometry = earthquake.getJSONObject("geometry");
-                            JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
-                            double latitude = JSONCoordinates.getDouble(1);
-                            double longitude = JSONCoordinates.getDouble(0);
-                            double distanceFromUser = NetworkUtilities.HaversineInKM(latitude, longitude, mLatitude, mLongitude);
-                            if (MainActivity.DEBUG_MODE)
-                                Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + mLatitude + " UserLongitude: " + mLongitude);
-                            earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser));
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+            new Thread(() -> {
+                try {
+                    JSONObject jsonObject = new JSONObject(data);
+                    final JSONArray earthquakesArray = jsonObject.getJSONArray("features");
+                    String location;
+                    double userLatitude = Double.longBitsToDouble(pref.getLong("location_latitude",0));
+                    double userLongitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
+                    for (int i1 = 0; i1 < earthquakesArray.length(); i1++) {
+                        JSONObject earthquake = earthquakesArray.getJSONObject(i1);
+                        JSONObject properties = earthquake.getJSONObject("properties");
+                        long timeInMs = properties.getLong("time");
+                        location = properties.getString("place");
+                        double mag = properties.getDouble("mag");
+                        mag = Math.round(mag * 10) / 10d;
+                        String detailsURL = properties.getString("detail");
+                        String id = earthquake.getString("id");
+                        JSONObject geometry = earthquake.getJSONObject("geometry");
+                        JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
+                        double latitude = JSONCoordinates.getDouble(1);
+                        double longitude = JSONCoordinates.getDouble(0);
+                        double distanceFromUser = NetworkUtilities.HaversineInKM(latitude, longitude, userLatitude, userLongitude);
+                        if (MainActivity.DEBUG_MODE)
+                            Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + userLatitude + " UserLongitude: " + userLongitude);
+                        earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser));
                     }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }).start();
             if (MainActivity.DEBUG_MODE) Log.v("tag", "Items: " + i);
         }
-
-        // LoaderManager.getInstance(this).destroyLoader(0);
-    }
-
-    private void filterRecyclerView() {
-//        mListCopy.clear();
-//        mListCopy.addAll(mList);
-//        filteredList.clear();
-//        if (!mSearchQuery.equals("")) {
-//            for (Earthquake earthquake : mList) {
-//                if (earthquake.getLocation().toLowerCase().contains(mSearchQuery)) {
-//                    filteredList.add(earthquake);
-//                }
-//            }
-//           // mAdapter.updateEarthquakes(filteredList);
-//            mListCopy.clear();
-//            mListCopy.addAll(filteredList);
-//            mAdapter.submitList(mListCopy);
-//        } else {
-////            filteredList.addAll(mListCopy);
-////           // mAdapter.updateEarthquakes(mListCopy);
-////            mList.clear();
-////            mList.addAll(mListCopy);
-//            mListCopy.clear();
-//            mListCopy.addAll(mList);
-//            mAdapter.submitList(mList);
-//            mAdapter.notifyDataSetChanged();
-//        }
-        earthquakeViewModel.setFilters(minMag, maxMag, mStartDate, mEndDate, mMaxRadius, mSearchQuery);
     }
 
     @Override
@@ -350,31 +243,15 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void sendData(double minMag, double maxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, double maxradius, boolean clearDatabase) {
-        this.minMag = minMag;
-        this.maxMag = maxMag;
-        this.mStartDate = startDate;
-        this.mEndDate = endDate;
-        this.mMaxRadius = maxradius;
-        this.mLatitude = latitude;
-        this.mLongitude = longitude;
-        if (clearDatabase) {
-            earthquakeViewModel.deleteAll();
-            fetchData();
-        }
+    public void sendData(double minMag, double maxMag, long startDate, long endDate, double latitude, double longitude, float maxradius) {
+        fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxradius);
         earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxradius, "");
         mLayoutManager.smoothScrollToPosition(mRecyclerView, null, 0);
     }
 
     @Override
     public void sendEarthquakeSearchQuery(String searchQuery) {
-        mSearchQuery = searchQuery.toLowerCase();
-        filterRecyclerView();
-    }
-
-    @Override
-    public void startFetching() {
-        fetchData();
+        earthquakeViewModel.search(searchQuery.toLowerCase());
     }
 
 }

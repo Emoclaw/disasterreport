@@ -43,9 +43,9 @@ import java.util.Locale;
 public class EarthquakeFiltersDialog extends DialogFragment implements DatePickerDialog.OnDateSetListener, View.OnClickListener, OnMapReadyCallback, OnSuccessListener<Location> {
     MapView mapView;
     GoogleMap gMap;
-    private double km;
-    private double selectedMinMag;
-    private double selectedMaxMag;
+    private float km;
+    private float selectedMinMag;
+    private float selectedMaxMag;
     private Circle circle;
     private EarthquakeFiltersDialogCompletedListener mListener;
     private Context mContext;
@@ -56,7 +56,7 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
     private TextView endDateTextView;
     private long startDate;
     private long endDate;
-    private double mMaxRadius = 180;
+    private float mMaxRadius = 180;
     private double mLatitude;
     private double mLongitude;
     private FusedLocationProviderClient fusedLocationClient;
@@ -84,7 +84,7 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         startDateTextView = view.findViewById(R.id.start_date_textView);
         endDateTextView = view.findViewById(R.id.end_date_textView);
         mListener = (EarthquakeFiltersDialogCompletedListener) getActivity();
-        Log.d(mContext.toString(), Double.toString(selectedMinMag));
+        if (MainActivity.DEBUG_MODE) Log.d(mContext.toString(), Float.toString(selectedMinMag));
 
         startDate = System.currentTimeMillis() - 86400000L;
         endDate = System.currentTimeMillis() + 86400000L;
@@ -96,30 +96,27 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         RadioButton thisWeekRadio = view.findViewById(R.id.this_week_earthquake);
         RadioButton CustomRadio = view.findViewById(R.id.custom_earthquake);
         RadioGroup radioGroup = view.findViewById(R.id.date_radioGroup);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                switch (i) {
-                    case R.id.last_24_earthquake:
-                        selectedDateRadio = 0;
-                        startDate = System.currentTimeMillis() - 86400000L;
-                        endDate = System.currentTimeMillis() + 86400000L;
-                        startDateTextView.setVisibility(View.INVISIBLE);
-                        endDateTextView.setVisibility(View.INVISIBLE);
-                        break;
-                    case R.id.this_week_earthquake:
-                        selectedDateRadio = 1;
-                        startDate = System.currentTimeMillis() - 7 * 86400000L;
-                        endDate = System.currentTimeMillis() + 86400000L;
-                        startDateTextView.setVisibility(View.INVISIBLE);
-                        endDateTextView.setVisibility(View.INVISIBLE);
-                        break;
-                    case R.id.custom_earthquake:
-                        selectedDateRadio = 2;
-                        startDateTextView.setVisibility(View.VISIBLE);
-                        endDateTextView.setVisibility(View.VISIBLE);
-                        break;
-                }
+        radioGroup.setOnCheckedChangeListener((radioGroup1, i) -> {
+            switch (i) {
+                case R.id.last_24_earthquake:
+                    selectedDateRadio = 0;
+                    startDate = System.currentTimeMillis() - 86400000L;
+                    endDate = System.currentTimeMillis() + 86400000L;
+                    startDateTextView.setVisibility(View.INVISIBLE);
+                    endDateTextView.setVisibility(View.INVISIBLE);
+                    break;
+                case R.id.this_week_earthquake:
+                    selectedDateRadio = 1;
+                    startDate = System.currentTimeMillis() - 7 * 86400000L;
+                    endDate = System.currentTimeMillis() + 86400000L;
+                    startDateTextView.setVisibility(View.INVISIBLE);
+                    endDateTextView.setVisibility(View.INVISIBLE);
+                    break;
+                case R.id.custom_earthquake:
+                    selectedDateRadio = 2;
+                    startDateTextView.setVisibility(View.VISIBLE);
+                    endDateTextView.setVisibility(View.VISIBLE);
+                    break;
             }
         });
         Button button = view.findViewById(R.id.earthquake_filters_ok_button);
@@ -131,10 +128,10 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                km = i * 111.12 / 4;
+                km = (float) (i * 111.12 / 4);
 
                 distanceTextView.setText("Distance: " + dec.format(km) + " km");
-                mMaxRadius = i / 4.0;
+                mMaxRadius = (float) (i / 4.0);
                 if (i == 0) {
                     distanceTextView.setText("Distance: Max/No Filter");
                     mMaxRadius = 180;
@@ -169,22 +166,22 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         int j;
         //Restore filter dialog state
         if (args != null) {
-            selectedMinMag = args.getDouble("minMagPos");
-            selectedMaxMag = args.getDouble("maxMagPos");
+            selectedMinMag = args.getFloat("minMagPos");
+            selectedMaxMag = args.getFloat("maxMagPos");
             selectedDateRadio = args.getInt("dateRadio");
             startDate = args.getLong("startDate");
             endDate = args.getLong("endDate");
             mLongitude = args.getDouble("longitude");
             mLatitude = args.getDouble("latitude");
-            mMaxRadius = args.getDouble("maxradius");
+            mMaxRadius = args.getFloat("maxradius");
             km = mMaxRadius * 1000;
             distanceSeekBar.setProgress((int) mMaxRadius * 4);
             j = (int) selectedMinMag * 10;
             minMagSeekBar.setProgress(j);
-            minMagTextView.setText(Double.toString(selectedMinMag));
+            minMagTextView.setText(Float.toString(selectedMinMag));
             j = (int) selectedMaxMag * 10;
             maxMagSeekBar.setProgress(j);
-            maxMagTextView.setText(Double.toString(selectedMaxMag));
+            maxMagTextView.setText(Float.toString(selectedMaxMag));
             switch (selectedDateRadio) {
                 case 0:
                     Last24HoursRadio.setChecked(true);
@@ -219,14 +216,14 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 //Set the max magnitude based on the progressbar
-                selectedMinMag = (double) i / 10;
+                selectedMinMag = (float) i / 10;
                 //Prevent minMag SeekBar from going over maxMag SeekBar
                 if (i >= maxMagSeekBar.getProgress()) {
                     minMagSeekBar.setProgress(maxMagSeekBar.getProgress());
                 }
                 //Set textView minMag value
-                minMagTextView.setText(Double.toString(selectedMinMag));
-                Log.d("minmag", Integer.toString(i));
+                minMagTextView.setText(Float.toString(selectedMinMag));
+                if (MainActivity.DEBUG_MODE) Log.d("minmag", Integer.toString(i));
             }
 
             @Override
@@ -257,13 +254,13 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 //Set the max magnitude based on the progressbar
-                selectedMaxMag = (double) i / 10;
+                selectedMaxMag = (float) i / 10;
                 if (i <= minMagSeekBar.getProgress()) {
                     //prevent maxMagSeekBar from going below minMagSeekBar
                     maxMagSeekBar.setProgress(minMagSeekBar.getProgress());
                 }
                 //Set maxMag TextView
-                maxMagTextView.setText(Double.toString(selectedMaxMag));
+                maxMagTextView.setText(Float.toString(selectedMaxMag));
             }
 
             @Override
@@ -464,6 +461,6 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
 
     //Create an interface to send data back to the MainActivity
     public interface EarthquakeFiltersDialogCompletedListener {
-        void onEarthquakeDialogComplete(double selectedMinMag, double selectedMaxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, double maxradius);
+        void onEarthquakeDialogComplete(float selectedMinMag, float selectedMaxMag, int selectedDateRadio, long startDate, long endDate, double latitude, double longitude, float maxradius);
     }
 }
