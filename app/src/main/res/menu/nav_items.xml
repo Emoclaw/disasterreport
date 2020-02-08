@@ -9,12 +9,15 @@
         <item
             android:id="@+id/earthquake_fragment"
             android:checked="true"
+            android:icon="@drawable/mag_icon"
             android:title="Earthquakes" />
         <item
             android:id="@+id/hurricane_fragment"
+            android:icon="@drawable/ic_hurricane"
             android:title="Hurricanes" />
         <item
             android:id="@+id/fire_fragment"
+            android:icon="@drawable/ic_flame"
             android:title="Fires" />
     </group>
 
@@ -23,7 +26,7 @@
         android:checkableBehavior="none">
         <item
             android:id="@+id/settings"
-
+            android:icon="@drawable/baseline_settings_black_36"
             android:title="Settings" />
     </group>
 </menu>
