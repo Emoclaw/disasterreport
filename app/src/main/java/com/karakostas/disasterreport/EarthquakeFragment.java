@@ -223,7 +223,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
                         JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
                         double latitude = JSONCoordinates.getDouble(1);
                         double longitude = JSONCoordinates.getDouble(0);
-                        double distanceFromUser = NetworkUtilities.HaversineInKM(latitude, longitude, userLatitude, userLongitude);
+                        double distanceFromUser = DisasterUtils.HaversineInKM(latitude, longitude, userLatitude, userLongitude);
                         if (MainActivity.DEBUG_MODE)
                             Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + userLatitude + " UserLongitude: " + userLongitude);
                         earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser));

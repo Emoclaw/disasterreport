@@ -41,9 +41,9 @@ public class EarthquakeLoader extends AsyncTaskLoader<String> {
     @Override
     public String loadInBackground() {
         if (mURL == null) {
-            return NetworkUtilities.getEarthquakeData(mStartDate, mEndDate, mMinMag, mMaxMag, mLatitude, mLongitude, mMaxRadius);
+            return DisasterUtils.getEarthquakeData(mStartDate, mEndDate, mMinMag, mMaxMag, mLatitude, mLongitude, mMaxRadius);
         } else {
-            return NetworkUtilities.getEarthquakeDetails(mURL);
+            return DisasterUtils.getEarthquakeDetails(mURL);
         }
     }
 }

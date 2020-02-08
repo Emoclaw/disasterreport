@@ -43,7 +43,7 @@ public class EarthquakeAdapter extends ListAdapter<Earthquake, EarthquakeAdapter
             holder.relativeLocationText.setText("");
         }
 
-        String mDate = NetworkUtilities.timeToString(earthquake.getDate());
+        String mDate = DisasterUtils.timeToString(earthquake.getDate());
         holder.dateText.setText(mDate);
         String mMag = Double.toString(earthquake.getMag());
         holder.magText.setText(mMag);

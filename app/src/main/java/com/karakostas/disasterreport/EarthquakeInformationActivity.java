@@ -50,7 +50,7 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
         String URL = intent.getStringExtra("detailsURL");
 
         dateTime = intent.getLongExtra("dateTime", 0);
-        dateTimeString = NetworkUtilities.timeToString(dateTime);
+        dateTimeString = DisasterUtils.timeToString(dateTime);
         MapView mapView = findViewById(R.id.mapView);
         mapView.setClickable(false);
         zoomInButton = findViewById(R.id.zoom_in_button);
@@ -165,7 +165,7 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
             list.add(completeLocationString + "\nLat: " + coords.latitude + ", Long: " + coords.longitude);
             if (MainActivity.DEBUG_MODE) {
                 Log.d("COORDINATES ", "" + coords.latitude + coords.longitude);
-                Log.d("COORDINATESDistance", "" + NetworkUtilities.HaversineInKM(coords.latitude, coords.longitude, 40.6375225D, 22.9522647D));
+                Log.d("COORDINATESDistance", "" + DisasterUtils.HaversineInKM(coords.latitude, coords.longitude, 40.6375225D, 22.9522647D));
             }
             list.add("Magnitude: " + mag + " " + magType);
             list.add("Depth: " + depth + " km");

@@ -14,7 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-class NetworkUtilities {
+class DisasterUtils {
 
 
     static final double EQUATORIAL_EARTH_RADIUS = 6378.1370D;
