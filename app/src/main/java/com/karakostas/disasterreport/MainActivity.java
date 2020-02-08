@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     protected void onResume() {
         super.onResume();
         drawerLayout.closeDrawer(Gravity.LEFT, false);
+        drawerToggle.syncState();
     }
 
     @Override

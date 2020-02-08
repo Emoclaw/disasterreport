@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -36,9 +35,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class EarthquakeFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>, MainActivity.sendDataToFragment {
     private List<Earthquake> mList = new ArrayList<>();
     private Context mContext;
@@ -136,6 +132,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipe);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorPrimary), ContextCompat.getColor(mContext, R.color.colorSecondary));
+
         FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(view1 -> mLayoutManager.scrollToPosition(0));
         mRecyclerView.setHasFixedSize(true);
@@ -145,17 +142,15 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         long endDate = System.currentTimeMillis() + 86400000L;
         earthquakeViewModel = new ViewModelProvider(this).get(EarthquakeViewModel.class);
         earthquakeViewModel.setFilters(2, 11, startDate, endDate, 180, "");
-        earthquakeViewModel.getFilteredEarthquakes().observe(getViewLifecycleOwner(), new Observer<List<Earthquake>>() {
-            @Override
-            public void onChanged(List<Earthquake> earthquakes) {
-                mList = earthquakes;
-                mAdapter.submitList(mList);
-                //mSwipeRefreshLayout.setRefreshing(false);
-            }
+        earthquakeViewModel.getFilteredEarthquakes().observe(getViewLifecycleOwner(), earthquakes -> {
+            mList = earthquakes;
+            mAdapter.submitList(mList);
         });
+
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
         pref = mContext.getSharedPreferences("EarthquakeFilterPrefs",0);
+
     }
 
     @Override
@@ -241,17 +236,22 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
     }
-
+    String mSearchQuery="";
     @Override
     public void sendData(double minMag, double maxMag, long startDate, long endDate, double latitude, double longitude, float maxradius) {
         fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxradius);
-        earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxradius, "");
+        earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxradius, mSearchQuery);
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxradius);
+            earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxradius, mSearchQuery);
+        });
         mLayoutManager.smoothScrollToPosition(mRecyclerView, null, 0);
     }
 
     @Override
     public void sendEarthquakeSearchQuery(String searchQuery) {
-        earthquakeViewModel.search(searchQuery.toLowerCase());
+        mSearchQuery = searchQuery;
+        earthquakeViewModel.search(mSearchQuery.toLowerCase());
     }
 
 }
