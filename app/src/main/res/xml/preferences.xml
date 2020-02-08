@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.preference.SwitchPreferenceCompat
-        android:defaultValue="false"
-        android:key="notification_switch"
-        android:summary=""
-        android:title="Enable Notifications" />
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" app:iconSpaceReserved="false"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="Notifications"
+        android:icon="@null"
+        app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="notification_switch"
+            android:summary="Not an early warning system - there are delays"
+            android:title="Enable Notifications"
+            app:iconSpaceReserved="false"/>
+       <Preference
+           android:title="Notification Settings"
+           android:summary="Set notification filters"
+           android:key="notification_filters"
+
+           app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

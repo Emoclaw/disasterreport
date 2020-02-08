@@ -23,7 +23,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
-import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -37,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     static final Boolean DEBUG_MODE = true;
     private SharedPreferences earthquakePrefs;
     private SharedPreferences.Editor earthquakePrefEditor;
+    SharedPreferences pref;
+    SharedPreferences.Editor defaultPrefEditor;
 
     private SearchView searchView;
     private MenuItem searchMenuItem;
@@ -53,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             float minMag = earthquakePrefs.getFloat("min_mag",2);
             float maxMag = earthquakePrefs.getFloat("max_mag",11);
             int selectedDateRadio = earthquakePrefs.getInt("selected_date_radio",0);
-            long startDate = earthquakePrefs.getLong("start_date",System.currentTimeMillis() - 86400000L);
-            long endDate = earthquakePrefs.getLong("end_date",System.currentTimeMillis() + 86400000L);
+            long startDate = pref.getLong("start_date",System.currentTimeMillis() - 86400000L);
+            long endDate = pref.getLong("end_date",System.currentTimeMillis() + 86400000L);
             float maxRadius = earthquakePrefs.getFloat("max_radius",180);
             showDialog(minMag,maxMag,selectedDateRadio,startDate,
                     endDate,maxRadius,
@@ -148,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             AlertDialog permissionExplanationDialog = permissionDialog.create();
             permissionExplanationDialog.show();
 
+        } else {
+            getLocationToPrefs();
         }
         fm = getSupportFragmentManager();
 
@@ -157,31 +160,27 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
 
-
+        earthquakePrefs = getApplicationContext().getSharedPreferences("EarthquakeFilterPrefs",0);
+        earthquakePrefEditor = earthquakePrefs.edit();
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        defaultPrefEditor = pref.edit();
         drawerToggle.syncState();
         drawerLayout.addDrawerListener(drawerToggle);
         NavigationView navigationView = findViewById(R.id.navigation);
         setupDrawerContent(navigationView);
         selectDrawerItem(navigationView.getMenu().getItem(0));
-        getSupportActionBar().setHomeButtonEnabled(true);
+
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean enableNotifications = sharedPref.getBoolean("notification_switch",false);
         if (enableNotifications) {
-            Data locationData = new Data.Builder()
-                    //Since latitude and longitude are stored as raw long bits, convert them back to double
-                    .putDouble("latitude",Double.longBitsToDouble(earthquakePrefs.getLong("location_latitude",0)))
-                    .putDouble("longitude",Double.longBitsToDouble(earthquakePrefs.getLong("location_longitude",0)))
-                    .build();
             PeriodicWorkRequest work = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
                     .addTag("notificationWorkTag")
-                    .setInputData(locationData)
                     .build();
             WorkManager.getInstance(this).enqueueUniquePeriodicWork("notificationWork", ExistingPeriodicWorkPolicy.KEEP, work);
         } else {
             WorkManager.getInstance(this).cancelUniqueWork("notificationWork");
         }
-        earthquakePrefs = getApplicationContext().getSharedPreferences("EarthquakeFilterPrefs",0);
-        earthquakePrefEditor = earthquakePrefs.edit();
+
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -265,8 +264,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         switch (requestCode) {
             case 0: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getLocationToPrefs();
                 } else {
                     Toast.makeText(MainActivity.this, "You need to enable Location permission. Exiting...", Toast.LENGTH_LONG).show();
@@ -277,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             // permissions this app might request.
         }
     }
+
     private void getLocationToPrefs(){
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
@@ -284,15 +283,11 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
                     if (location != null) {
                         //Since Editor doesn't have putDouble, convert Double to it's raw long bits
                         //We don't use putFloat as we can lose precision, and putString is inefficient
-                        earthquakePrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
-                        earthquakePrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
-                        earthquakePrefEditor.commit();
+
+                        defaultPrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
+                        defaultPrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
+                        defaultPrefEditor.commit();
                         s.sendData(2, 11, System.currentTimeMillis() - 86400000L, System.currentTimeMillis() + 86400000L, location.getLatitude(), location.getLongitude(), 180);
-                        //If last known location is null, make a new request
-                    } else {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            getLocationToPrefs();
-                        }
                     }
                 });
     }

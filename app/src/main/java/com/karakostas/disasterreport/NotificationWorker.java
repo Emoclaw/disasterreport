@@ -1,13 +1,16 @@
 package com.karakostas.disasterreport;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.preference.PreferenceManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import org.json.JSONArray;
@@ -25,11 +28,20 @@ public class NotificationWorker extends Worker {
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
-
+    private static final String GROUP_EARTHQUAKE_NOTIFICATION_KEY = "com.karakostas.disasterreport.EARTHQUAKES";
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
     @NonNull
     @Override
     public Result doWork() {
         createNotificationChannel();
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = pref.edit();
+        double mLongitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
+        double mLatitude = Double.longBitsToDouble(pref.getLong("location_latitude",0));
+        float mMaxRadius = pref.getFloat("max_radius_notification_filter",180);
+        float minMag = pref.getFloat("min_mag_notification_filter",0);
+        float maxMag = pref.getFloat("max_mag_notification_filter",11);
         EarthquakeDao dao = DisasterRoomDatabase.getDatabase(getApplicationContext()).earthquakeDao();
         long startDate = System.currentTimeMillis() - 4*3600000L;
         long endDate = System.currentTimeMillis() + 3600000L;
@@ -38,11 +50,9 @@ public class NotificationWorker extends Worker {
         format.setTimeZone(timeZone);
         String startDateString = format.format(startDate);
         String endDateString = format.format(endDate);
-        double mLatitude = (getInputData().getDouble("latitude",0));
         String latitudeString = Double.toString(mLatitude);
-        double mLongitude = (getInputData().getDouble("longitude",0));
         String longitudeString = Double.toString(mLongitude);
-        String data = NetworkUtilities.getEarthquakeData(startDateString,endDateString,"0.0","11.0",latitudeString,longitudeString,"180");
+        String data = DisasterUtils.getEarthquakeData(startDateString,endDateString,Float.toString(minMag),Float.toString(maxMag),latitudeString,longitudeString,Float.toString(mMaxRadius));
         List<Earthquake> mList = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(data);
@@ -61,7 +71,7 @@ public class NotificationWorker extends Worker {
                 JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
                 double latitude = JSONCoordinates.getDouble(1);
                 double longitude = JSONCoordinates.getDouble(0);
-                double distanceFromUser = NetworkUtilities.HaversineInKM(latitude, longitude, mLatitude, mLongitude);
+                double distanceFromUser = DisasterUtils.HaversineInKM(latitude, longitude, mLatitude, mLongitude);
                 if (MainActivity.DEBUG_MODE)
                     Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + mLatitude + " UserLongitude: " + mLongitude);
                 mList.add(new Earthquake(location,timeInMs,mag,detailsURL,id,latitude,longitude,distanceFromUser));
@@ -70,22 +80,38 @@ public class NotificationWorker extends Worker {
             e.printStackTrace();
         }
 
-        for (int i = mList.size() - 1; i > 0; i--) {
+        for (int i = mList.size() - 1; i >= 0; i--) {
             if (dao.findEarthquakeById(mList.get(i).getId()) == null) {
-                createNotification(mList.get(i).getLocation(), "An eartquake with magnitude of " + mList.get(i).getMag() + " has occurred");
+                createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred",i,mList.get(i).getDate());
                 dao.insert(mList.get(i));
             }
         }
         return Result.success();
     }
-    private void createNotification(String title, String text){
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),"1")
+    private void createNotification(String title, String text, int id,long time){
+        Notification earthquakeNotification =  new NotificationCompat.Builder(getApplicationContext(),"1")
                 .setSmallIcon(R.drawable.mag_icon)
                 .setContentTitle(title)
                 .setContentText(text)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setSubText("test")
+                .setWhen(time)
+
+                .setGroup(GROUP_EARTHQUAKE_NOTIFICATION_KEY)
+                .setPriority(NotificationCompat.PRIORITY_HIGH).build();
+
         NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
-        manager.notify(1,builder.build());
+
+        Notification earthquakeSummary =
+                new NotificationCompat.Builder(getApplicationContext(),"1")
+                        .setContentTitle("Earthquakes have occured")
+                        .setContentText(text)
+                        .setSmallIcon(R.drawable.mag_icon)
+                        .setGroup(GROUP_EARTHQUAKE_NOTIFICATION_KEY)
+                        .setGroupSummary(true)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(text)).build();
+
+        manager.notify(id,earthquakeNotification);
+        manager.notify(id,earthquakeSummary);
     }
 
     private void createNotificationChannel() {
