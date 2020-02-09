@@ -19,12 +19,13 @@ public class EarthquakeDetailsAdapter extends BaseAdapter {
     private Context context; //context
     private ArrayList<String> items; //data source of the list adapter
     private ArrayList<Integer> images;
-
+    private boolean nightMode;
     //public constructor
-    EarthquakeDetailsAdapter(Context context, ArrayList<String> text, ArrayList<Integer> images) {
+    EarthquakeDetailsAdapter(Context context, ArrayList<String> text, ArrayList<Integer> images,boolean nightMode) {
         this.context = context;
         this.items = text;
         this.images = images;
+        this.nightMode = nightMode;
     }
 
     @Override
@@ -56,9 +57,12 @@ public class EarthquakeDetailsAdapter extends BaseAdapter {
         // get the TextView for item name and item description
         TextView textViewItemName = convertView.findViewById(R.id.earthquake_listView_textView);
         ImageView imageView = convertView.findViewById(R.id.earthquake_listView_imageView);
-
+        if(nightMode){
+            textViewItemName.setTextColor(Color.WHITE);
+        } else {
+            textViewItemName.setTextColor(Color.BLACK);
+        }
         //sets the text for item name and item description from the current item object
-
         if (images.get(position) == R.drawable.ic_location) {
             String[] s = currentItem.split("\n");
             SpannableString s1 = new SpannableString(s[0] + "\n");
@@ -72,9 +76,7 @@ public class EarthquakeDetailsAdapter extends BaseAdapter {
         } else {
             textViewItemName.setText(currentItem);
         }
-
         imageView.setImageResource(images.get(position));
-
         // returns the view for the current row
         return convertView;
     }

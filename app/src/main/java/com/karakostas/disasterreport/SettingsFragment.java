@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
@@ -30,6 +31,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final Context mContext = getActivity();
+
     }
 
     @Override
@@ -41,12 +43,23 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
+        Preference themePreference = findPreference("night_mode_switch");
         Preference notificationPreference = findPreference("notification_switch");
         Preference notificationFilterPreference = findPreference("notification_filters");
         assert notificationFilterPreference != null;
         assert notificationPreference != null;
-        pref = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
+        pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
+        assert themePreference != null;
+        themePreference.setOnPreferenceChangeListener((preference, newValue) ->{
+            boolean a = Boolean.parseBoolean(newValue.toString());
+            if (a){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+            return true;
+        });
 
         if (pref.getBoolean("notification_switch",false)){
             notificationFilterPreference.setEnabled(true);
@@ -59,7 +72,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 notificationFilterPreference.setEnabled(true);
                 PeriodicWorkRequest work = new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
                         .addTag("notificationWorkTag")
-                        .setInitialDelay(10,TimeUnit.MINUTES)
+                        .setInitialDelay(1,TimeUnit.MINUTES)
                         .build();
                 WorkManager.getInstance(mContext).enqueueUniquePeriodicWork("notificationWork", ExistingPeriodicWorkPolicy.KEEP, work);
 

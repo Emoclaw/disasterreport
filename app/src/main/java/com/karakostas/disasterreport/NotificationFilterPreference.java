@@ -26,10 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.text.DecimalFormat;
@@ -261,6 +258,9 @@ public class NotificationFilterPreference extends DialogFragment implements OnMa
         gMap.getUiSettings().setScrollGesturesEnabled(false);
         gMap.getUiSettings().setMapToolbarEnabled(false);
         gMap.setOnMapClickListener(null);
+        if (pref.getBoolean("night_mode_switch",false)){
+            gMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(mContext,R.raw.map_night));
+        }
         fusedLocationClient.getLastLocation().addOnSuccessListener(this);
         //Show a dialog that explains the weird circle on the map when it's too big, when the info icon is clicked
         infoImageView.setOnClickListener(view -> {

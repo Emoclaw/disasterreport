@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" app:iconSpaceReserved="false"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="General"
+        app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="night_mode_switch"
+            android:summary=""
+            android:title="Dark Mode"
+            app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
     <PreferenceCategory android:title="Notifications"
         android:icon="@null"
         app:iconSpaceReserved="false">
@@ -17,4 +27,5 @@
 
            app:iconSpaceReserved="false"/>
     </PreferenceCategory>
+
 </androidx.preference.PreferenceScreen>

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cyanLight"
+    style="@style/FragmentConstraintLayoutStyle"
     tools:context=".EarthquakeInformationActivity">
 
     <Button
@@ -70,18 +70,10 @@
 
     <TextView
         android:id="@+id/possibly_felt_textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/orange_square"
-        android:shadowColor="#000000"
-        android:shadowDx="2.5"
-        android:elevation="1dp"
-        android:shadowDy="2.3"
-        android:shadowRadius="3.6"
         android:text=" Possibly Perceptable"
-        android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="@+id/probably_felt_textView"
-        app:layout_constraintTop_toBottomOf="@+id/probably_felt_textView" />
+        app:layout_constraintTop_toBottomOf="@+id/probably_felt_textView"
+        style="@style/earthquakeInformationExplanationTextViewStyle" />
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
@@ -92,6 +84,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         map:cameraZoom="2"
-        map:liteMode="true"
-        map:mapType="terrain" />
+        map:liteMode="true" />
 </androidx.constraintlayout.widget.ConstraintLayout>

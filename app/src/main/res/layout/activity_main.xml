@@ -27,25 +27,20 @@
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimary"
                 app:collapseIcon="@drawable/ic_back_arrow"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
                 app:menu="@menu/toolbar_items"
-                app:theme="@style/ActionBarThemeOverlay" />
+                app:theme="@style/ActionBarThemeOverlay"
+                style="@style/Toolbar" />
 
         </com.google.android.material.appbar.AppBarLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation"
-        android:layout_width="wrap_content"
         app:itemIconTint="@color/colorSecondary"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
-        app:itemBackground="@drawable/drawer_selected_item"
-        app:menu="@menu/nav_items" />
+        app:menu="@menu/nav_items"
+        style="@style/NavigationViewStyle" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

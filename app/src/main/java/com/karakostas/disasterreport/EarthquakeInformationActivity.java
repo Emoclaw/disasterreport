@@ -1,6 +1,7 @@
 package com.karakostas.disasterreport;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.preference.PreferenceManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -41,14 +43,16 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
     private Button zoomInButton;
     private String dateTimeString;
     private long dateTime;
-
+    boolean nightMode = false;
+    SharedPreferences pref;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_earthquake_information);
         Intent intent = getIntent();
         String URL = intent.getStringExtra("detailsURL");
-
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        nightMode = pref.getBoolean("night_mode_switch",false);
         dateTime = intent.getLongExtra("dateTime", 0);
         dateTimeString = DisasterUtils.timeToString(dateTime);
         MapView mapView = findViewById(R.id.mapView);
@@ -146,6 +150,7 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
             gMap.addCircle(smallerCircle);
             gMap.moveCamera(CameraUpdateFactory.zoomBy(3));
             gMap.setMinZoomPreference(2);
+
             zoomInButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -181,7 +186,7 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
             iconList.add(R.drawable.ic_tsunami);
             iconList.add(R.drawable.ic_hash);
             iconList.add(R.drawable.ic_update);
-            EarthquakeDetailsAdapter adapter = new EarthquakeDetailsAdapter(getApplicationContext(), list, iconList);
+            EarthquakeDetailsAdapter adapter = new EarthquakeDetailsAdapter(getApplicationContext(), list, iconList, nightMode);
             ListView lv = findViewById(R.id.earthquake_listView);
             lv.setAdapter(adapter);
         } catch (JSONException e) {
@@ -202,6 +207,9 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
         gMap.getUiSettings().setAllGesturesEnabled(false);
         gMap.getUiSettings().setScrollGesturesEnabled(false);
         gMap.getUiSettings().setMapToolbarEnabled(false);
+        if (nightMode){
+            gMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getApplicationContext(),R.raw.map_night));
+        }
         LoaderManager.getInstance(EarthquakeInformationActivity.this).restartLoader(1, queryBundle, this);
     }
 

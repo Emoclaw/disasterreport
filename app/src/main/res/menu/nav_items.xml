@@ -9,7 +9,7 @@
         <item
             android:id="@+id/earthquake_fragment"
             android:checked="true"
-            android:icon="@drawable/mag_icon"
+            android:icon="@drawable/ic_depth"
             android:title="Earthquakes" />
         <item
             android:id="@+id/hurricane_fragment"

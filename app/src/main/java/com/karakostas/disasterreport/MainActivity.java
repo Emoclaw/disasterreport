@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -59,8 +60,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             float maxRadius = earthquakePrefs.getFloat("max_radius",180);
             showDialog(minMag,maxMag,selectedDateRadio,startDate,
                     endDate,maxRadius,
-                    Double.longBitsToDouble(earthquakePrefs.getLong("location_latitude",0)),
-                    Double.longBitsToDouble(earthquakePrefs.getLong("location_longitude",0)));
+                    Double.longBitsToDouble(pref.getLong("location_latitude",0)),
+                    Double.longBitsToDouble(pref.getLong("location_longitude",0)));
         }
         if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         super.onResume();
         drawerLayout.closeDrawer(Gravity.LEFT, false);
         drawerToggle.syncState();
+
     }
 
     @Override
@@ -133,6 +135,14 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (pref.getBoolean("night_mode_switch",false)){
+            if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES)
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO)
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -151,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             permissionExplanationDialog.show();
 
         } else {
-            getLocationToPrefs();
+            getLocationToPrefs(false);
         }
         fm = getSupportFragmentManager();
 
@@ -163,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
 
         earthquakePrefs = getApplicationContext().getSharedPreferences("EarthquakeFilterPrefs",0);
         earthquakePrefEditor = earthquakePrefs.edit();
-        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         defaultPrefEditor = pref.edit();
         drawerToggle.syncState();
         drawerLayout.addDrawerListener(drawerToggle);
@@ -216,7 +226,6 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             default:
                 fragmentClass = EarthquakeFragment.class;
         }
-
         try {
             if (fragmentClass != null) fragment = (Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
@@ -266,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             case 0: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getLocationToPrefs();
+                    getLocationToPrefs(true);
                 } else {
                     Toast.makeText(MainActivity.this, "You need to enable Location permission. Exiting...", Toast.LENGTH_LONG).show();
                     finish();
@@ -277,18 +286,19 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         }
     }
 
-    private void getLocationToPrefs(){
+    private void getLocationToPrefs(boolean fresh){
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         //Since Editor doesn't have putDouble, convert Double to it's raw long bits
                         //We don't use putFloat as we can lose precision, and putString is inefficient
-
                         defaultPrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
                         defaultPrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
                         defaultPrefEditor.commit();
-                        s.sendData(2, 11, System.currentTimeMillis() - 86400000L, System.currentTimeMillis() + 86400000L, location.getLatitude(), location.getLongitude(), 180);
+                        if (fresh)
+                            s.sendData(2, 11, System.currentTimeMillis() - 86400000L, System.currentTimeMillis() + 86400000L, location.getLatitude(), location.getLongitude(), 180);
+
                     }
                 });
     }

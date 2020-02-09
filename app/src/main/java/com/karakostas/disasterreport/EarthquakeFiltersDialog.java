@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,16 +23,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.text.DateFormat;
@@ -383,6 +382,10 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         gMap.getUiSettings().setAllGesturesEnabled(false);
         gMap.getUiSettings().setScrollGesturesEnabled(false);
         gMap.getUiSettings().setMapToolbarEnabled(false);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        if (pref.getBoolean("night_mode_switch",false)){
+            gMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(mContext,R.raw.map_night));
+        }
         gMap.setOnMapClickListener(null);
         fusedLocationClient.getLastLocation().addOnSuccessListener(this);
         //Show a dialog that explains the weird circle on the map when it's too big, when the info icon is clicked

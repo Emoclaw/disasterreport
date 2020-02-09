@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -43,6 +44,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EarthquakeAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
+    SharedPreferences earthquakeFilterPrefs;
     SharedPreferences pref;
     public EarthquakeFragment() {
         // Required empty public constructor
@@ -138,10 +140,25 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         mRecyclerView.setHasFixedSize(true);
 
         mAdapter = new EarthquakeAdapter();
-        long startDate = System.currentTimeMillis() - 86400000L;
-        long endDate = System.currentTimeMillis() + 86400000L;
+        long defaultStartDate = System.currentTimeMillis() - 86400000L;
+        long defaultEndDate = System.currentTimeMillis() + 86400000L;
         earthquakeViewModel = new ViewModelProvider(this).get(EarthquakeViewModel.class);
-        earthquakeViewModel.setFilters(2, 11, startDate, endDate, 180, "");
+        earthquakeFilterPrefs = mContext.getSharedPreferences("EarthquakeFilterPrefs",0);
+        pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        double latitude = Double.longBitsToDouble(pref.getLong("location_latitude",0));
+        double longitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
+        float minMag = earthquakeFilterPrefs.getFloat("min_mag", 2);
+        float maxMag = earthquakeFilterPrefs.getFloat("max_mag", 11);
+        long startDate = earthquakeFilterPrefs.getLong("start_date", defaultStartDate);
+        long endDate = earthquakeFilterPrefs.getLong("end_date", defaultEndDate);
+        float maxRadius = earthquakeFilterPrefs.getFloat("max_radius", 180);
+
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxRadius);
+            earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxRadius, mSearchQuery);
+        });
+
+        earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxRadius, mSearchQuery);
         earthquakeViewModel.getFilteredEarthquakes().observe(getViewLifecycleOwner(), earthquakes -> {
             mList = earthquakes;
             mAdapter.submitList(mList);
@@ -149,7 +166,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        pref = mContext.getSharedPreferences("EarthquakeFilterPrefs",0);
+
 
     }
 
