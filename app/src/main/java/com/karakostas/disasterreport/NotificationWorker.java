@@ -1,9 +1,8 @@
 package com.karakostas.disasterreport;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.*;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
@@ -79,23 +78,33 @@ public class NotificationWorker extends Worker {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        int count = 0;
         for (int i = mList.size() - 1; i >= 0; i--) {
             if (dao.findEarthquakeById(mList.get(i).getId()) == null) {
-                createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred",i,mList.get(i).getDate());
+                count++;
+                createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred", count,mList.get(i).getDate(),mList.get(i).getURL());
                 dao.insert(mList.get(i));
             }
         }
         return Result.success();
     }
-    private void createNotification(String title, String text, int id,long time){
+    private void createNotification(String location, String title, int id,long time, String URL){
+        Intent intent = new Intent(getApplicationContext(), EarthquakeInformationActivity.class);
+        //Inflate the backstack so that we can return to MainActivity
+        intent.putExtra("detailsURL", URL);
+        intent.putExtra("Location", location);
+        intent.putExtra("dateTime", time);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+        stackBuilder.addNextIntentWithParentStack(intent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(id, PendingIntent.FLAG_UPDATE_CURRENT);
+
         Notification earthquakeNotification =  new NotificationCompat.Builder(getApplicationContext(),"1")
                 .setSmallIcon(R.drawable.mag_icon)
                 .setContentTitle(title)
-                .setContentText(text)
-                .setSubText("test")
+                .setContentText(location)
                 .setWhen(time)
-
+                .setSubText("Disaster Report")
+                .setContentIntent(resultPendingIntent)
                 .setGroup(GROUP_EARTHQUAKE_NOTIFICATION_KEY)
                 .setPriority(NotificationCompat.PRIORITY_HIGH).build();
 
@@ -103,15 +112,16 @@ public class NotificationWorker extends Worker {
 
         Notification earthquakeSummary =
                 new NotificationCompat.Builder(getApplicationContext(),"1")
-                        .setContentTitle("Earthquakes have occured")
-                        .setContentText(text)
-                        .setSmallIcon(R.drawable.mag_icon)
-                        .setGroup(GROUP_EARTHQUAKE_NOTIFICATION_KEY)
-                        .setGroupSummary(true)
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(text)).build();
+                .setContentTitle("New earthquakes have occurred")
+                .setSmallIcon(R.drawable.mag_icon)
+                .setStyle(new NotificationCompat.InboxStyle()
+                        .setBigContentTitle(id +" new earthquakes")
+                        .setSummaryText("Expand/Click for more details"))
+                .setGroup(GROUP_EARTHQUAKE_NOTIFICATION_KEY)
+                .setGroupSummary(true).build();
 
         manager.notify(id,earthquakeNotification);
-        manager.notify(id,earthquakeSummary);
+        manager.notify(-1,earthquakeSummary);
     }
 
     private void createNotificationChannel() {
