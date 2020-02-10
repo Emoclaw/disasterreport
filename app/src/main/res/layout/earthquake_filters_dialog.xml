@@ -227,7 +227,7 @@
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="175dp"
         android:clickable="false"
         app:cameraZoom="1"
