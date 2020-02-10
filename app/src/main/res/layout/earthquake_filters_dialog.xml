@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/edit_name"
-    style="@style/EarthquakeFilterConstraintLayout">
+    style="@style/EarthquakeFilterConstraintLayout"
+    >
 
     <Button
         android:id="@+id/earthquake_filters_ok_button"
@@ -44,13 +45,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Last 24 hours" />
+            android:text="24 hours" />
 
         <RadioButton
             android:id="@+id/this_week_earthquake"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last 7 days" />
+            android:text="7 days" />
 
         <RadioButton
             android:id="@+id/custom_earthquake"
@@ -105,20 +106,20 @@
 
     <TextView
         android:id="@+id/textView"
+        style="@style/EarthquakeFiltersTitleTextView"
         android:text="Earthquake Filters"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        style="@style/EarthquakeFiltersTitleTextView" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/magnitude_textView_filter"
+        style="@style/EarthquakeFilterTextView"
         android:layout_marginTop="8dp"
         android:text="Magnitude"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        style="@style/EarthquakeFilterTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <TextView
         android:id="@+id/textView2"
@@ -172,10 +173,10 @@
     <TextView
 
         android:id="@+id/date_textView_filter"
+        style="@style/EarthquakeFilterTextView"
         android:text="Date"
         app:layout_constraintBottom_toTopOf="@+id/date_radioGroup"
-        app:layout_constraintStart_toStartOf="parent"
-        style="@style/EarthquakeFilterTextView" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/start_date_textView"
@@ -186,9 +187,9 @@
         android:background="?android:attr/selectableItemBackground"
         android:drawableRight="@drawable/icc_dropdown_arrow"
         android:text="Start Date"
-        android:textColor="@android:color/black"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
-        app:layout_constraintStart_toStartOf="@+id/date_radioGroup" />
+        app:layout_constraintStart_toStartOf="@+id/date_radioGroup"
+        style="@style/EarthquakeFilterNormalTextView"/>
 
 
     <TextView
@@ -200,17 +201,17 @@
         android:background="?android:attr/selectableItemBackground"
         android:drawableRight="@drawable/icc_dropdown_arrow"
         android:text="End Date"
-        android:textColor="@android:color/black"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
-        app:layout_constraintStart_toEndOf="@+id/start_date_textView" />
+        app:layout_constraintStart_toEndOf="@+id/start_date_textView"
+        style="@style/EarthquakeFilterNormalTextView" />
 
 
     <TextView
         android:id="@+id/textView4"
+        style="@style/EarthquakeFilterTextView"
         android:text="Location"
         app:layout_constraintBottom_toTopOf="@+id/distance_seekbar"
-        app:layout_constraintStart_toStartOf="parent"
-        style="@style/EarthquakeFilterTextView" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/distance_textView"
@@ -224,16 +225,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/map" />
 
-    <com.google.android.gms.maps.MapView xmlns:map="http://schemas.android.com/apk/res-auto"
+    <com.google.android.gms.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="175dp"
         android:clickable="false"
-        map:cameraZoom="1"
-        map:layout_constraintBottom_toTopOf="@+id/earthquake_filters_ok_button"
-        map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toStartOf="parent"
-        map:liteMode="true"
-        map:mapType="normal" />
+        app:cameraZoom="1"
+        app:layout_constraintBottom_toTopOf="@+id/earthquake_filters_ok_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:liteMode="true"
+        app:mapType="normal" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

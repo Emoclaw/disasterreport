@@ -11,7 +11,7 @@ android {
         applicationId "com.karakostas.disasterreport"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 32
+        versionCode 34
         multiDexEnabled true
         versionName "3.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

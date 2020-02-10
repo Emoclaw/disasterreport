@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="430dp"
     style="@style/EarthquakeFilterConstraintLayout"
-    android:minWidth="380dp"
     android:minHeight="430dp">
 
     <Button
@@ -104,7 +103,8 @@
         android:gravity="center_horizontal"
         android:text="Min"
         app:layout_constraintBottom_toTopOf="@+id/textView3"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/EarthquakeFilterNormalTextView"/>
 
     <TextView
         android:id="@+id/min_mag_textView"
@@ -115,7 +115,8 @@
         android:gravity="center_horizontal"
         app:layout_constraintBottom_toTopOf="@+id/max_mag_textView"
         app:layout_constraintEnd_toEndOf="@+id/max_mag_textView"
-        tools:text="11.0" />
+        tools:text="11.0"
+        style="@style/EarthquakeFilterNormalTextView"/>
 
 
     <TextView
@@ -128,7 +129,8 @@
         android:gravity="center_horizontal"
         android:text="Max"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/EarthquakeFilterNormalTextView"/>
 
     <TextView
         android:id="@+id/max_mag_textView"
@@ -140,7 +142,8 @@
         android:gravity="center_horizontal"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        tools:text="11.0" />
+        tools:text="11.0"
+        style="@style/EarthquakeFilterNormalTextView"/>
 
 
     <TextView

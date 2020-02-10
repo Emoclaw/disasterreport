@@ -70,8 +70,8 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">520dp</item>
         <item name="android:background">@color/colorPrimaryNight</item>
-        <item name="android:minWidth">380dp</item>
-        <item name="android:minHeight">520dp</item>
+        <item name="android:minWidth">330dp</item>
+        <item name="android:minHeight">500dp</item>
     </style>
 
     <style name="EarthquakeFilterTextView">
@@ -133,6 +133,9 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_marginLeft">24dp</item>
         <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="EarthquakeFilterNormalTextView">
         <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>
