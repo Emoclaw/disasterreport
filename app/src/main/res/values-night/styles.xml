@@ -84,7 +84,7 @@
         <item name="android:textStyle">bold</item>
     </style>
     <style name="EarthquakeFiltersTitleTextView">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">39dp</item>
         <item name="android:background">@color/colorPrimaryNight</item>
         <item name="android:gravity">center_vertical</item>
@@ -137,5 +137,12 @@
     </style>
     <style name="EarthquakeFilterNormalTextView">
         <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="datePicker" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="colorAccent">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:windowBackground">@color/colorPrimaryNight</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@color/colorSecondary</item>
     </style>
 </resources>

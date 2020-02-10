@@ -352,7 +352,7 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
     }
 
     private void showDatePickerDialog() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, this,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(mContext,R.style.datePicker, this,
                 Calendar.getInstance().get(Calendar.YEAR),
                 Calendar.getInstance().get(Calendar.MONTH),
                 Calendar.getInstance().get(Calendar.DAY_OF_MONTH));

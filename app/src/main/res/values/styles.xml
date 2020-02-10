@@ -134,5 +134,7 @@
     <style name="EarthquakeFilterNormalTextView">
         <item name="android:textColor">#808080</item>
     </style>
+    <style name="datePicker" parent="ThemeOverlay.AppCompat.Dialog">
 
+    </style>
 </resources>
