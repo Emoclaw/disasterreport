@@ -44,6 +44,8 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EarthquakeAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
+    long startDate;
+    long endDate;
     SharedPreferences earthquakeFilterPrefs;
     SharedPreferences pref;
     public EarthquakeFragment() {
@@ -149,15 +151,28 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         double longitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
         float minMag = earthquakeFilterPrefs.getFloat("min_mag", 2);
         float maxMag = earthquakeFilterPrefs.getFloat("max_mag", 11);
-        long startDate = earthquakeFilterPrefs.getLong("start_date", defaultStartDate);
-        long endDate = earthquakeFilterPrefs.getLong("end_date", defaultEndDate);
+        int dateRadio = earthquakeFilterPrefs.getInt("selected_date_radio",0);
+        startDate = defaultStartDate;
+        endDate = defaultEndDate;
+        switch (dateRadio) {
+            case 1:
+                startDate = System.currentTimeMillis() - 7 * 86400000L;
+                endDate = defaultEndDate;
+                break;
+            case 2:
+                startDate = earthquakeFilterPrefs.getLong("start_date", defaultStartDate);
+                endDate = earthquakeFilterPrefs.getLong("end_date", defaultEndDate);
+                break;
+        }
         float maxRadius = earthquakeFilterPrefs.getFloat("max_radius", 180);
 
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxRadius);
-            earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxRadius, mSearchQuery);
+            fetchData(minMag, maxMag, startDate, startDate, latitude, longitude, maxRadius);
+            earthquakeViewModel.setFilters(minMag, maxMag, startDate, startDate, maxRadius, mSearchQuery);
         });
-
+        if (latitude != 0 && longitude != 0){
+            fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxRadius);
+        }
         earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxRadius, mSearchQuery);
         earthquakeViewModel.getFilteredEarthquakes().observe(getViewLifecycleOwner(), earthquakes -> {
             mList = earthquakes;
@@ -187,23 +202,23 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        String startDate = null;
-        String endDate = null;
+        String stringStartDate = null;
+        String stringEndDate = null;
         String maxMag = null;
         String minMag = null;
         String latitude = null;
         String longitude = null;
         String maxradius = null;
         if (args != null) {
-            startDate = args.getString("startDate");
-            endDate = args.getString("endDate");
+            stringStartDate = args.getString("startDate");
+            stringEndDate = args.getString("endDate");
             minMag = args.getString("minMag");
             maxMag = args.getString("maxMag");
             latitude = args.getString("latitude");
             longitude = args.getString("longitude");
             maxradius = args.getString("maxradius");
         }
-        return new EarthquakeLoader(mContext, startDate, endDate, minMag, maxMag, latitude, longitude, maxradius);
+        return new EarthquakeLoader(mContext, stringStartDate, stringEndDate, minMag, maxMag, latitude, longitude, maxradius);
     }
 
     @Override
