@@ -167,8 +167,8 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         float maxRadius = earthquakeFilterPrefs.getFloat("max_radius", 180);
 
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            fetchData(minMag, maxMag, startDate, startDate, latitude, longitude, maxRadius);
-            earthquakeViewModel.setFilters(minMag, maxMag, startDate, startDate, maxRadius, mSearchQuery);
+            fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxRadius);
+            earthquakeViewModel.setFilters(minMag, maxMag, startDate, endDate, maxRadius, mSearchQuery);
         });
         if (latitude != 0 && longitude != 0){
             fetchData(minMag, maxMag, startDate, endDate, latitude, longitude, maxRadius);
