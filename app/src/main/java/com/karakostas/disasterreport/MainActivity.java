@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     private SharedPreferences.Editor earthquakePrefEditor;
     SharedPreferences pref;
     SharedPreferences.Editor defaultPrefEditor;
+    Toolbar toolbar;
 
     private SearchView searchView;
     private MenuItem searchMenuItem;
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     @Override
     protected void onResume() {
         super.onResume();
+        setSupportActionBar(toolbar);
         drawerLayout.closeDrawer(Gravity.LEFT, false);
         drawerToggle.syncState();
 
@@ -165,9 +167,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         }
         fm = getSupportFragmentManager();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
+        toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
 
