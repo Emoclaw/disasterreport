@@ -94,7 +94,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }
     private void showDialog() {
 
-        NotificationFilterPreference earthquakeFiltersDialog = NotificationFilterPreference.newInstance("Title");
+        EarthquakeNotificationFilterPreference earthquakeFiltersDialog = EarthquakeNotificationFilterPreference.newInstance("Title");
         FragmentManager fm = getActivity().getSupportFragmentManager();
         earthquakeFiltersDialog.show(fm, "earthquakeFilters");
     }

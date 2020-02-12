@@ -392,7 +392,7 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         infoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(mContext, R.style.datePicker).create();
                 alertDialog.setTitle("Weird Map Circle");
                 alertDialog.setMessage("Because the Earth is an imperfect sphere and the map is a flat rectangle, as the circle becomes " +
                         "bigger and approaches the poles, it becomes distorted. \n" +
