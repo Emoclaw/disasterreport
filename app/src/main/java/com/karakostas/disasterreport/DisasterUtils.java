@@ -1,12 +1,10 @@
 package com.karakostas.disasterreport;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -28,6 +26,7 @@ class DisasterUtils {
     private static final String PARAM_LONGITUDE = "longitude";
     private static final String PARAM_MAXRADIUS = "maxradius";
 
+    private static final String HURRICANE_URL = "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r00/access/csv/ibtracs.ACTIVE.list.v04r00.csv";
     static String getEarthquakeData(String startTime, String endTime, String minMag, String maxMag, String latitude, String longitude, String maxradius) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -131,6 +130,38 @@ class DisasterUtils {
             }
         }
         return null;
+    }
+
+    static void getHurricaneData(Context context) {
+        HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            URL requestURL = new URL(HURRICANE_URL);
+            urlConnection = (HttpURLConnection) requestURL.openConnection();
+            urlConnection.connect();
+            inputStream = urlConnection.getInputStream();
+            outputStream = new FileOutputStream(context.getFilesDir() + "/active.csv");
+
+            byte data[] = new byte[4096];
+            int count;
+            while ((count = inputStream.read(data)) != -1) {
+                outputStream.write(data, 0, count);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null)
+                urlConnection.disconnect();
+            try {
+                if (outputStream != null)
+                    outputStream.close();
+                if (inputStream != null)
+                    inputStream.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     static String timeToString(long time) {
