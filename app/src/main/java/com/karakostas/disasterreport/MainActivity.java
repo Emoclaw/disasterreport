@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -138,15 +137,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (pref.getBoolean("night_mode_switch",false)){
-            if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES)
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO)
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder permissionDialog = new AlertDialog.Builder(MainActivity.this);
             permissionDialog.setMessage("Disaster Report needs to access your location in order to " +
