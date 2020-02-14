@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     SharedPreferences pref;
     SharedPreferences.Editor defaultPrefEditor;
     Toolbar toolbar;
+    NavigationView navigationView;
 
     private SearchView searchView;
     private MenuItem searchMenuItem;
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         setSupportActionBar(toolbar);
         drawerLayout.closeDrawer(Gravity.LEFT, false);
         drawerToggle.syncState();
-
+        navigationView.setCheckedItem(pref.getInt("selected_disaster",0));
     }
 
     @Override
@@ -154,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             permissionExplanationDialog.show();
 
         } else {
-            getLocationToPrefs(false);
+            getLocationToPrefs();
         }
         fm = getSupportFragmentManager();
 
@@ -162,16 +163,14 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
-
         earthquakePrefs = getApplicationContext().getSharedPreferences("EarthquakeFilterPrefs",0);
         earthquakePrefEditor = earthquakePrefs.edit();
-
         defaultPrefEditor = pref.edit();
         drawerToggle.syncState();
         drawerLayout.addDrawerListener(drawerToggle);
-        NavigationView navigationView = findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         setupDrawerContent(navigationView);
-        selectDrawerItem(navigationView.getMenu().getItem(0));
+        selectDrawerItem(navigationView.getMenu().getItem(pref.getInt("selected_disaster",0)));
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean enableNotifications = sharedPref.getBoolean("notification_switch",false);
@@ -198,16 +197,16 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         // Create a new fragment and specify the fragment to show based on nav item clicked
         Fragment fragment = null;
 
-        Class fragmentClass;
+        Class<?> fragmentClass;
         switch (menuItem.getItemId()) {
-            case R.id.earthquake_fragment:
-                fragmentClass = EarthquakeFragment.class;
-                break;
             case R.id.hurricane_fragment:
                 fragmentClass = HurricaneFragment.class;
+                defaultPrefEditor.putInt("selected_disaster",1);
+
                 break;
             case R.id.fire_fragment:
                 fragmentClass = FireFragment.class;
+                defaultPrefEditor.putInt("selected_disaster",2);
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
@@ -217,7 +216,9 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
                 break;
             default:
                 fragmentClass = EarthquakeFragment.class;
+                defaultPrefEditor.putInt("selected_disaster",0);
         }
+        defaultPrefEditor.commit();
         try {
             if (fragmentClass != null) fragment = (Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
@@ -267,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             case 0: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getLocationToPrefs(true);
+                    getLocationToPrefs();
                 } else {
                     Toast.makeText(MainActivity.this, "You need to enable Location permission. Exiting...", Toast.LENGTH_LONG).show();
                     finish();
@@ -278,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         }
     }
 
-    private void getLocationToPrefs(boolean fresh){
+    private void getLocationToPrefs(){
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     // Got last known location. In some rare situations this can be null.
@@ -288,9 +289,6 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
                         defaultPrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
                         defaultPrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
                         defaultPrefEditor.commit();
-                        if (fresh)
-                            s.sendData(2, 11, System.currentTimeMillis() - 86400000L, System.currentTimeMillis() + 86400000L, location.getLatitude(), location.getLongitude(), 180);
-
                     }
                 });
     }
