@@ -4,16 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class EarthquakeAdapter extends ListAdapter<Earthquake, EarthquakeAdapter.ViewHolder> implements Filterable {
-    private LayoutInflater mInflater;
+public class EarthquakeAdapter extends ListAdapter<Earthquake, EarthquakeAdapter.ViewHolder>   {
     private Context mContext;
 
     protected EarthquakeAdapter() {
@@ -26,7 +23,7 @@ public class EarthquakeAdapter extends ListAdapter<Earthquake, EarthquakeAdapter
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         mContext = parent.getContext();
         View view = layoutInflater.inflate(R.layout.earthquake, parent, false);
-        return new EarthquakeAdapter.ViewHolder(view, this);
+        return new ViewHolder(view, this);
     }
 
     @Override
@@ -75,22 +72,7 @@ public class EarthquakeAdapter extends ListAdapter<Earthquake, EarthquakeAdapter
         holder.magText.setTextColor(ContextCompat.getColor(mContext, color));
     }
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                return null;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-
-            }
-        };
-    }
-
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView locationText;
         final TextView relativeLocationText;
         final TextView dateText;

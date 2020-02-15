@@ -31,7 +31,6 @@ public class Earthquake {
     private Double longitude;
     private Double distanceFromUser;
 
-
     public Earthquake(String location, long date, double mag, String URL, @NonNull String id, double latitude, double longitude, double distanceFromUser) {
         this.date = date;
         this.mag = mag;
@@ -59,7 +58,6 @@ public class Earthquake {
         return URL;
     }
 
-    ;
 
     @NonNull
     String getId() {
