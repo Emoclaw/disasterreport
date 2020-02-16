@@ -9,7 +9,7 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
-        android:id="@+id/action_filter"
+        android:id="@+id/action_earthquake_filter"
         android:icon="@drawable/ic_filter"
         android:orderInCategory="300"
         android:title="filters"

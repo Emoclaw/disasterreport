@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_filter) {
+        if (id == R.id.action_earthquake_filter) {
             float minMag = earthquakePrefs.getFloat("min_mag",2);
             float maxMag = earthquakePrefs.getFloat("max_mag",11);
             int selectedDateRadio = earthquakePrefs.getInt("selected_date_radio",0);
@@ -202,11 +202,14 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             case R.id.hurricane_fragment:
                 fragmentClass = HurricaneFragment.class;
                 defaultPrefEditor.putInt("selected_disaster",1);
-
+                toolbar.getMenu().findItem(R.id.action_earthquake_filter).setVisible(false);
+                toolbar.getMenu().findItem(R.id.action_earthquake_search).setVisible(false);
                 break;
             case R.id.fire_fragment:
                 fragmentClass = FireFragment.class;
                 defaultPrefEditor.putInt("selected_disaster",2);
+                toolbar.getMenu().findItem(R.id.action_earthquake_filter).setVisible(false);
+                toolbar.getMenu().findItem(R.id.action_earthquake_search).setVisible(false);
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
@@ -216,6 +219,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
                 break;
             default:
                 fragmentClass = EarthquakeFragment.class;
+                toolbar.getMenu().findItem(R.id.action_earthquake_filter).setVisible(true);
+                toolbar.getMenu().findItem(R.id.action_earthquake_search).setVisible(true);
                 defaultPrefEditor.putInt("selected_disaster",0);
         }
         defaultPrefEditor.commit();
