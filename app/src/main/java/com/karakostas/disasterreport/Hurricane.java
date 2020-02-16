@@ -11,15 +11,45 @@ import java.util.List;
 
 @Entity(tableName = "hurricane_table")
 public class Hurricane {
-    List<String[]> multipleDetailList = new ArrayList<>();
+    @PrimaryKey
+    @ColumnInfo(name = "SID")
+    @NonNull
+    String SID;
+    String name;
+    List<Float> latitudeList = new ArrayList<>();
+    List<Float> longitudeList = new ArrayList<>();
+    List<String> timeList = new ArrayList<>();
 
-    public Hurricane(@NonNull String SID, List<String[]> multipleDetailList){
+
+    public Hurricane(@NonNull String SID, String name, List<Float> latitudeList, List<Float> longitudeList, List<String> timeList){
         this.SID = SID;
-        this.multipleDetailList.addAll(multipleDetailList);
+        this.latitudeList.addAll(latitudeList);
+        this.name = name;
+        this.longitudeList.addAll(longitudeList);
+        this.timeList.addAll(timeList);
     }
-    public List<String[]> getMultipleDetailList() {
-        return multipleDetailList;
+
+    @NonNull
+    public String getSID() {
+        return SID;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Float> getLatitudeList() {
+        return latitudeList;
+    }
+
+    public List<Float> getLongitudeList() {
+        return longitudeList;
+    }
+
+    public List<String> getTimeList() {
+        return timeList;
+    }
+
     public static DiffUtil.ItemCallback<Hurricane> DIFF_CALLBACK = new DiffUtil.ItemCallback<Hurricane>() {
         @Override
         public boolean areItemsTheSame(@NonNull Hurricane oldItem, @NonNull Hurricane newItem) {
@@ -32,21 +62,6 @@ public class Hurricane {
         }
     };
 
-    List<String> LAT;
 
-    public List<String> getLAT() {
-        return LAT;
-    }
-
-
-    @PrimaryKey
-    @ColumnInfo(name = "SID")
-    @NonNull
-    String SID;
-
-    @NonNull
-    public String getSID() {
-        return SID;
-    }
 
 }

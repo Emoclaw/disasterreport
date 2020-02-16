@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical"
-    android:layout_width="match_parent" android:layout_height="60dp">
-    <TextView
-        android:id="@+id/sid_hurricane"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="60dp">
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:textColor="#333333"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:text="SID:3234234234234" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name_hurricane"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:textSize="12sp"
+
+            android:textStyle="bold"
+            tools:text="Hurricane Kyriakos" />
+
+        <TextView
+            android:id="@+id/date_textView_hurricane"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_marginStart="16dp"
+
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="12sp"
+            tools:text="2019-05-27" />
+
+    </LinearLayout>
 </LinearLayout>

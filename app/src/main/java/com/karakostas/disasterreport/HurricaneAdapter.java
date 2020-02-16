@@ -34,15 +34,18 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Hurricane hurricane = mList.get(position);
-        holder.textView.setText(hurricane.getSID());
+        holder.nameTextView.setText(hurricane.getName());
+        holder.dateTextView.setText(hurricane.getTimeList().get(0));
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView textView;
+        final TextView nameTextView;
+        final TextView dateTextView;
         final HurricaneAdapter mAdapter;
         ViewHolder(@NonNull View itemView, HurricaneAdapter adapter) {
             super(itemView);
-            textView = itemView.findViewById(R.id.sid_hurricane);
+            nameTextView = itemView.findViewById(R.id.name_hurricane);
+            dateTextView = itemView.findViewById(R.id.date_textView_hurricane);
             mAdapter = adapter;
         }
     }
