@@ -9,7 +9,7 @@ import androidx.room.Query;
 import java.util.List;
 
 @Dao
-public interface EarthquakeDao {
+public interface DisasterDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Earthquake earthquake);
 

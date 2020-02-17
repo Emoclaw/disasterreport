@@ -8,7 +8,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Earthquake.class}, version = 4, exportSchema = false)
+@Database(entities = {Earthquake.class, Hurricane.class}, version = 5, exportSchema = false)
 public abstract class DisasterRoomDatabase extends RoomDatabase {
     private static DisasterRoomDatabase INSTANCE;
     private static RoomDatabase.Callback sRoomDatabaseCallback =
@@ -37,11 +37,11 @@ public abstract class DisasterRoomDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract EarthquakeDao earthquakeDao();
+    public abstract DisasterDao earthquakeDao();
 
     private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
-        private final EarthquakeDao mDao;
+        private final DisasterDao mDao;
 
         PopulateDbAsync(DisasterRoomDatabase db) {
             mDao = db.earthquakeDao();

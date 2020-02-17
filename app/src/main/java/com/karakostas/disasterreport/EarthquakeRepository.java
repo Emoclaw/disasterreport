@@ -7,31 +7,31 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 public class EarthquakeRepository {
-    private EarthquakeDao earthquakeDao;
+    private DisasterDao disasterDao;
     EarthquakeRepository(Application application) {
         DisasterRoomDatabase db = DisasterRoomDatabase.getDatabase(application);
-        earthquakeDao = db.earthquakeDao();
+        disasterDao = db.earthquakeDao();
     }
 
 
     LiveData<List<Earthquake>> getFilteredEarthquakes(double minMag, double maxMag, long startDate, long endDate, double circleRadius, String searchQuery) {
         LiveData<List<Earthquake>> mFilteredEarthquakes;
         if (searchQuery.equals("")) {
-            mFilteredEarthquakes = earthquakeDao.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius);
+            mFilteredEarthquakes = disasterDao.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius);
         } else {
-            mFilteredEarthquakes = earthquakeDao.getFilteredEarthquakesWithSearch(minMag, maxMag, startDate, endDate, circleRadius, searchQuery);
+            mFilteredEarthquakes = disasterDao.getFilteredEarthquakesWithSearch(minMag, maxMag, startDate, endDate, circleRadius, searchQuery);
         }
         return mFilteredEarthquakes;
     }
 
     public void insert(Earthquake earthquake) {
-        new insertAsyncTask(earthquakeDao).execute(earthquake);
+        new insertAsyncTask(disasterDao).execute(earthquake);
     }
 
     private static class deleteAllEarthquakesAsyncTask extends AsyncTask<Void, Void, Void> {
-        private EarthquakeDao mAsyncTaskDao;
+        private DisasterDao mAsyncTaskDao;
 
-        deleteAllEarthquakesAsyncTask(EarthquakeDao dao) {
+        deleteAllEarthquakesAsyncTask(DisasterDao dao) {
             mAsyncTaskDao = dao;
         }
 
@@ -43,14 +43,14 @@ public class EarthquakeRepository {
     }
 
     public void deleteAll() {
-        new deleteAllEarthquakesAsyncTask(earthquakeDao).execute();
+        new deleteAllEarthquakesAsyncTask(disasterDao).execute();
     }
 
     private static class insertAsyncTask extends AsyncTask<Earthquake, Void, Void> {
 
-        private EarthquakeDao mAsyncTaskDao;
+        private DisasterDao mAsyncTaskDao;
 
-        insertAsyncTask(EarthquakeDao dao) {
+        insertAsyncTask(DisasterDao dao) {
             mAsyncTaskDao = dao;
         }
 

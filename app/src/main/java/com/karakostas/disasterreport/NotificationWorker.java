@@ -41,7 +41,7 @@ public class NotificationWorker extends Worker {
         float mMaxRadius = pref.getFloat("max_radius_notification_filter",180);
         float minMag = pref.getFloat("min_mag_notification_filter",0);
         float maxMag = pref.getFloat("max_mag_notification_filter",11);
-        EarthquakeDao dao = DisasterRoomDatabase.getDatabase(getApplicationContext()).earthquakeDao();
+        DisasterDao dao = DisasterRoomDatabase.getDatabase(getApplicationContext()).earthquakeDao();
         long startDate = System.currentTimeMillis() - 4*3600000L;
         long endDate = System.currentTimeMillis() + 3600000L;
         TimeZone timeZone = TimeZone.getDefault();
