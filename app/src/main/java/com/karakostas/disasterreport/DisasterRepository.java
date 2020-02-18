@@ -6,9 +6,9 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-public class EarthquakeRepository {
+public class DisasterRepository {
     private DisasterDao disasterDao;
-    EarthquakeRepository(Application application) {
+    DisasterRepository(Application application) {
         DisasterRoomDatabase db = DisasterRoomDatabase.getDatabase(application);
         disasterDao = db.earthquakeDao();
     }
@@ -24,8 +24,14 @@ public class EarthquakeRepository {
         return mFilteredEarthquakes;
     }
 
-    public void insert(Earthquake earthquake) {
-        new insertAsyncTask(disasterDao).execute(earthquake);
+    public void insertEarthquake(Earthquake earthquake) {
+        new insertEarthquakeAsyncTask(disasterDao).execute(earthquake);
+    }
+    public void insertHurricane(Hurricane hurricane) {
+        new insertHurricaneAsyncTask(disasterDao).execute(hurricane);
+    }
+    LiveData<List<Hurricane>> getHurricanes(){
+        return disasterDao.getHurricanes();
     }
 
     private static class deleteAllEarthquakesAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -46,17 +52,32 @@ public class EarthquakeRepository {
         new deleteAllEarthquakesAsyncTask(disasterDao).execute();
     }
 
-    private static class insertAsyncTask extends AsyncTask<Earthquake, Void, Void> {
+    private static class insertEarthquakeAsyncTask extends AsyncTask<Earthquake, Void, Void> {
 
         private DisasterDao mAsyncTaskDao;
 
-        insertAsyncTask(DisasterDao dao) {
+        insertEarthquakeAsyncTask(DisasterDao dao) {
             mAsyncTaskDao = dao;
         }
 
         @Override
         protected Void doInBackground(final Earthquake... params) {
-            mAsyncTaskDao.insert(params[0]);
+            mAsyncTaskDao.insertEarthquake(params[0]);
+            return null;
+        }
+    }
+
+    private static class insertHurricaneAsyncTask extends AsyncTask<Hurricane, Void, Void> {
+
+        private DisasterDao mAsyncTaskDao;
+
+        insertHurricaneAsyncTask(DisasterDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Hurricane... params) {
+            mAsyncTaskDao.insertHurricane(params[0]);
             return null;
         }
     }

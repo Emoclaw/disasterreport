@@ -11,14 +11,14 @@ public class EarthquakeViewModel extends AndroidViewModel {
     long startDate, endDate;
     double circleRadius;
     String searchQuery = "";
-    private EarthquakeRepository mRepository;
+    private DisasterRepository mRepository;
     private LiveData<List<Earthquake>> mAllEarthquakes;
     private LiveData<List<Earthquake>> mFilteredEarthquakes;
     private MutableLiveData<earthquakeFilter> earthquakeFilter;
 
     public EarthquakeViewModel(@NonNull Application application) {
         super(application);
-        mRepository = new EarthquakeRepository(application);
+        mRepository = new DisasterRepository(application);
         earthquakeFilter = new MediatorLiveData<>();
         mFilteredEarthquakes = Transformations.switchMap(earthquakeFilter, input -> mRepository.getFilteredEarthquakes(minMag, maxMag, startDate, endDate, circleRadius, searchQuery));
 
@@ -46,7 +46,7 @@ public class EarthquakeViewModel extends AndroidViewModel {
         setFilters(minMag,maxMag,startDate,endDate, circleRadius,s);
     }
     void insert(Earthquake earthquake) {
-        mRepository.insert(earthquake);
+        mRepository.insertEarthquake(earthquake);
     }
 
     static class earthquakeFilter {

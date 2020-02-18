@@ -11,7 +11,10 @@ import java.util.List;
 @Dao
 public interface DisasterDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(Earthquake earthquake);
+    void insertEarthquake(Earthquake earthquake);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertHurricane(Hurricane hurricane);
 
     @Query("DELETE FROM earthquake_table")
     void deleteAll();
@@ -29,4 +32,7 @@ public interface DisasterDao {
 
     @Query("SELECT * from earthquake_table WHERE id == :id")
     Earthquake findEarthquakeById(String id);
+
+    @Query("SELECT * from hurricane_table ORDER BY name")
+    LiveData<List<Hurricane>> getHurricanes();
 }

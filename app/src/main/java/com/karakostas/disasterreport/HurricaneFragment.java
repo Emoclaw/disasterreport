@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,6 +29,7 @@ import java.util.List;
 public class HurricaneFragment extends Fragment implements LoaderManager.LoaderCallbacks<File> {
     List<String[]> list;
     List<Hurricane> mList = new ArrayList<>();
+    private HurricaneViewModel hurricaneViewModel;
     Context mContext;
     HurricaneAdapter adapter;
     public HurricaneFragment() {
@@ -51,13 +53,15 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView mRecyclerView = view.findViewById(R.id.recyclerView_hurricane);
-
-
+        adapter = new HurricaneAdapter();
+        hurricaneViewModel = new ViewModelProvider(this).get(HurricaneViewModel.class);
+        hurricaneViewModel.getHurricanes().observe(getViewLifecycleOwner(), earthquakes -> {
+            mList = earthquakes;
+            adapter.submitList(mList);
+        });
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-        adapter = new HurricaneAdapter(mList);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        adapter.notifyDataSetChanged();
         LoaderManager.getInstance(this).restartLoader(1, null, this);
     }
 
@@ -102,7 +106,7 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
             if (!list.get(i)[0].equals(list.get(i+1)[0])){
                 hurricaneUniqueIds.add(list.get(i)[0]);
                 hurricaneUniqueNames.add(list.get(i)[1]);
-                mList.add(new Hurricane(list.get(i)[0],list.get(i)[1],latitudeList,longitudeList,timeList));
+                hurricaneViewModel.insert(new Hurricane(list.get(i)[0],list.get(i)[1],latitudeList,longitudeList,timeList));
                 latitudeList.clear();
                 longitudeList.clear();
                 timeList.clear();
@@ -110,7 +114,6 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
         }
         long elapsed = System.nanoTime() - time;
         Log.d("Benchmark"," Time " + elapsed +" ns");
-        adapter.notifyDataSetChanged();
     }
 
     @Override

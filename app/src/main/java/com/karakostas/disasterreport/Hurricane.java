@@ -5,10 +5,10 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity(tableName = "hurricane_table")
 public class Hurricane {
     @PrimaryKey
@@ -16,12 +16,16 @@ public class Hurricane {
     @NonNull
     String SID;
     String name;
-    List<Float> latitudeList = new ArrayList<>();
-    List<Float> longitudeList = new ArrayList<>();
-    List<String> timeList = new ArrayList<>();
+    @TypeConverters(HurricaneConverters.class)
+    ArrayList<String> timeList = new ArrayList<>();
+    @TypeConverters(HurricaneConverters.class)
+    ArrayList<Float> latitudeList = new ArrayList<>();
+    @TypeConverters(HurricaneConverters.class)
+    ArrayList<Float> longitudeList = new ArrayList<>();
 
 
-    public Hurricane(@NonNull String SID, String name, List<Float> latitudeList, List<Float> longitudeList, List<String> timeList){
+
+    public Hurricane(@NonNull String SID, String name, ArrayList<Float> latitudeList, ArrayList<Float> longitudeList, ArrayList<String> timeList){
         this.SID = SID;
         this.latitudeList.addAll(latitudeList);
         this.name = name;
@@ -38,11 +42,11 @@ public class Hurricane {
         return name;
     }
 
-    public List<Float> getLatitudeList() {
+    public ArrayList<Float> getLatitudeList() {
         return latitudeList;
     }
 
-    public List<Float> getLongitudeList() {
+    public ArrayList<Float> getLongitudeList() {
         return longitudeList;
     }
 

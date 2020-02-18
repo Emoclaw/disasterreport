@@ -83,7 +83,7 @@ public class NotificationWorker extends Worker {
             if (dao.findEarthquakeById(mList.get(i).getId()) == null) {
                 count++;
                 createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred", count,mList.get(i).getDate(),mList.get(i).getURL());
-                dao.insert(mList.get(i));
+                dao.insertEarthquake(mList.get(i));
             }
         }
         return Result.success();
