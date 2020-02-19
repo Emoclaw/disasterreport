@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         drawerLayout.closeDrawer(Gravity.LEFT, false);
         drawerToggle.syncState();
         navigationView.setCheckedItem(pref.getInt("selected_disaster",0));
+        toolbar.setTitle(navigationView.getCheckedItem().getTitle());
     }
 
     @Override
@@ -238,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             menuItem.setChecked(true);
             drawerLayout.closeDrawer(Gravity.LEFT, false);
         }
-        setTitle(menuItem.getTitle());
+        toolbar.setTitle(menuItem.getTitle());
     }
 
     //Implement EarthquakeFiltersDialogCompletedListener's onEarthquakeDialogComplete method to receive the data
