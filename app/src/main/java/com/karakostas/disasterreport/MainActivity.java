@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_items, menu);
-
         searchMenuItem = menu.findItem(R.id.action_earthquake_search);
         searchView = (SearchView) searchMenuItem.getActionView();
         searchView.setQueryHint("Search");
@@ -108,6 +107,17 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         });
         if (searchView != null) {
             searchView.setIconified(true);
+        }
+        //Adjust toolbar menu visibility based on previously selected disaster upon starting MainActivity
+        switch (pref.getInt("selected_disaster",0)) {
+            case 1:
+            case 2:
+                toolbar.getMenu().findItem(R.id.action_earthquake_filter).setVisible(false);
+                searchMenuItem.setVisible(false);
+                break;
+            default:
+                toolbar.getMenu().findItem(R.id.action_earthquake_filter).setVisible(true);
+                searchMenuItem.setVisible(true);
         }
         return true;
     }
