@@ -33,7 +33,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements EarthquakeFiltersDialog.EarthquakeFiltersDialogCompletedListener {
-    static final Boolean DEBUG_MODE = true;
+    static final boolean DEBUG_MODE = true;
     private SharedPreferences earthquakePrefs;
     private SharedPreferences.Editor earthquakePrefEditor;
     SharedPreferences pref;
@@ -181,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         drawerLayout.addDrawerListener(drawerToggle);
         navigationView = findViewById(R.id.navigation);
         setupDrawerContent(navigationView);
-        selectDrawerItem(navigationView.getMenu().getItem(pref.getInt("selected_disaster",0)));
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean enableNotifications = sharedPref.getBoolean("notification_switch",false);
@@ -305,6 +304,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
                         defaultPrefEditor.putLong("location_latitude",Double.doubleToRawLongBits(location.getLatitude()));
                         defaultPrefEditor.putLong("location_longitude",Double.doubleToRawLongBits(location.getLongitude()));
                         defaultPrefEditor.commit();
+                        //Refresh the currently selected fragment so that their data is initialized with location info
+                        selectDrawerItem(navigationView.getMenu().getItem(pref.getInt("selected_disaster",0)));
                     }
                 });
     }
