@@ -53,6 +53,8 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView mRecyclerView = view.findViewById(R.id.recyclerView_hurricane);
+
+        mRecyclerView.setHasFixedSize(true);
         adapter = new HurricaneAdapter();
         hurricaneViewModel = new ViewModelProvider(this).get(HurricaneViewModel.class);
         hurricaneViewModel.getHurricanes().observe(getViewLifecycleOwner(), earthquakes -> {
