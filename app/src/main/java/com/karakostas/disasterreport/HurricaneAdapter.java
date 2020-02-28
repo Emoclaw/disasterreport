@@ -1,18 +1,26 @@
 package com.karakostas.disasterreport;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.ViewHolder> {
     boolean nightMode = false;
@@ -28,7 +36,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
         return new HurricaneAdapter.ViewHolder(view, this);
     }
 
-    //Free map resources when recycled
+
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         super.onViewRecycled(holder);
@@ -50,6 +58,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
         final TextView dateTextView;
         private Context mContext;
         HurricaneAdapter mAdapter;
+        int wh;
         MapView mapView;
         GoogleMap gMap;
         ViewHolder(@NonNull View itemView, HurricaneAdapter adapter) {
@@ -60,6 +69,10 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
             nameTextView = itemView.findViewById(R.id.name_hurricane);
             dateTextView = itemView.findViewById(R.id.date_textView_hurricane);
             mAdapter = adapter;
+
+            //Glide uses px sizes, convert dp to px.
+            wh = (int) (30 * Resources.getSystem().getDisplayMetrics().density);
+
             if (mapView != null){
                 mapView.onCreate(null);
                 mapView.getMapAsync(this);
@@ -85,13 +98,21 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
                 //Map info
                 Hurricane hurricane = (Hurricane) mapView.getTag();
                 gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0))));
-                Bitmap b = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_hurricane);
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b, 100, 100, false);
-                BitmapDescriptor marker = BitmapDescriptorFactory.fromBitmap(smallMarker);
-                gMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0)))
-                        .icon(marker)
-                        .anchor(0.5f,0.5f));
+                Glide.with(mContext).asBitmap().load(R.drawable.ic_hurricane).into(new CustomTarget<Bitmap>(wh,wh) {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        gMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0)))
+                                .icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                .anchor(0.5f,0.5f));
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
+
 
                 //Set map back to normal, since it's set to none when recycled
                 gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
