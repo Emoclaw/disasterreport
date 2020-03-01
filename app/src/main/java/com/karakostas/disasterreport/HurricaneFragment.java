@@ -16,12 +16,17 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.gms.maps.model.LatLng;
+import com.univocity.parsers.common.ParsingContext;
+import com.univocity.parsers.common.processor.AbstractRowProcessor;
+import com.univocity.parsers.common.processor.ConcurrentRowProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,46 +81,47 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onLoadFinished(@NonNull Loader<File> loader, File data) {
 
-        Toast.makeText(mContext,"Load Complete",Toast.LENGTH_LONG).show();
-        //Read the file, only needed columns
+        //Read & parse the csv file
         //TODO: Determine needed columns
         CsvParserSettings settings = new CsvParserSettings();
-        settings.selectFields("SID","NAME","LAT","LON","ISO_TIME","DIST2LAND");
+        //settings.selectFields("SID","NAME","LAT","LON","ISO_TIME","DIST2LAND");
+        settings.selectIndexes(0, 5, 8, 9, 6, 14);
+        settings.setColumnReorderingEnabled(false);
         settings.setSkipEmptyLines(true);
-        settings.setNullValue("");
-        CsvParser parser = new CsvParser(settings);
-        try {
-            list = parser.parseAll(new FileReader(data));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        //Parse the file.
-        //Because some cells are repeating in some columns (like SID, NAME), and some columns correspond to a certain
-        // Hurricane - SID (column 0), we need to split them accordingly.
-        //There might be a better way than using multiple lists.
-        long time = System.nanoTime();
-        ArrayList<String> hurricaneUniqueIds = new ArrayList<>();
-        ArrayList<String> hurricaneUniqueNames = new ArrayList<>();
-        ArrayList<Float> latitudeList = new ArrayList<>();
-        ArrayList<Float> longitudeList = new ArrayList<>();
-        ArrayList<String> timeList = new ArrayList<>();
-        for (int i = 2; i < list.size() - 1; i++){
-            //Store all non-repeating rows & columns which correspond to one Hurricane
-            latitudeList.add(Float.parseFloat(list.get(i)[2]));
-            longitudeList.add(Float.parseFloat(list.get(i)[3]));
-            timeList.add(list.get(i)[4]);
-            //If SID is different, store the Hurricane & its data in the POJO list and clear the data list.
-            if (!list.get(i)[0].equals(list.get(i+1)[0])){
-                hurricaneUniqueIds.add(list.get(i)[0]);
-                hurricaneUniqueNames.add(list.get(i)[1]);
-                hurricaneViewModel.insert(new Hurricane(list.get(i)[0],list.get(i)[1],latitudeList,longitudeList,timeList));
-                latitudeList.clear();
-                longitudeList.clear();
-                timeList.clear();
+        settings.setReadInputOnSeparateThread(true);
+        settings.setNumberOfRowsToSkip(2);
+        settings.setProcessor(new ConcurrentRowProcessor(new AbstractRowProcessor() {
+            ArrayList<Float> latitudeList = new ArrayList<>(100);
+            ArrayList<Float> longitudeList = new ArrayList<>(100);
+            ArrayList<String> timeList = new ArrayList<>(100);
+            ArrayList<String> sidList = new ArrayList<>(100);
+            ArrayList<String> nameList = new ArrayList<>(100);
+            ArrayList<LatLng> locationList = new ArrayList<>(100);
+            int i = 0;
+
+            @Override
+            public void rowProcessed(String[] row, ParsingContext context) {
+                sidList.add(row[0]);
+                latitudeList.add(Float.parseFloat(row[8]));
+                longitudeList.add(Float.parseFloat(row[9]));
+                locationList.add(new LatLng(Float.parseFloat(row[8]), Float.parseFloat(row[9])));
+                timeList.add(row[6]);
+                nameList.add(row[5]);
+                if (i != 0 && !row[0].equals(sidList.get(i - 1))) {
+                    hurricaneViewModel.insert(new Hurricane(sidList.get(i - 1), nameList.get(i - 1), latitudeList, longitudeList, timeList));
+                    latitudeList.clear();
+                    longitudeList.clear();
+                    timeList.clear();
+                    sidList.clear();
+                    nameList.clear();
+                    i = 0;
+                } else {
+                    i++;
+                }
             }
-        }
-        long elapsed = System.nanoTime() - time;
-        Log.d("Benchmark"," Time " + elapsed +" ns");
+        }));
+        CsvParser parser = new CsvParser(settings);
+        parser.parse(data);
     }
 
     @Override
