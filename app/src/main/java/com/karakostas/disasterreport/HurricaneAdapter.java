@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,10 +18,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 
 public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.ViewHolder> {
     boolean nightMode = false;
@@ -112,8 +110,12 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
 
                     }
                 });
-
-
+                PolylineOptions polylineOptions = new PolylineOptions();
+                polylineOptions.color(ContextCompat.getColor(mContext,R.color.colorSecondary)).width(5);
+                for (int i=0; i<hurricane.getLongitudeList().size();i++){
+                    polylineOptions.add(new LatLng(hurricane.getLatitudeList().get(i),hurricane.getLongitudeList().get(i)));
+                }
+                Polyline polyline = gMap.addPolyline(polylineOptions);
                 //Set map back to normal, since it's set to none when recycled
                 gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             }
