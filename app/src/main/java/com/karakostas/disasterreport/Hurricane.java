@@ -16,6 +16,7 @@ public class Hurricane {
     @NonNull
     String SID;
     String name;
+    String time;
     @TypeConverters(HurricaneConverters.class)
     ArrayList<String> timeList = new ArrayList<>();
     @TypeConverters(HurricaneConverters.class)
@@ -24,13 +25,13 @@ public class Hurricane {
     ArrayList<Float> longitudeList = new ArrayList<>();
 
 
-
     public Hurricane(@NonNull String SID, String name, ArrayList<Float> latitudeList, ArrayList<Float> longitudeList, ArrayList<String> timeList){
         this.SID = SID;
         this.latitudeList.addAll(latitudeList);
         this.name = name;
         this.longitudeList.addAll(longitudeList);
         this.timeList.addAll(timeList);
+        this.time = timeList.get(0);
     }
 
     @NonNull
