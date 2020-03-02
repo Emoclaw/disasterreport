@@ -144,5 +144,7 @@
         <item name="android:windowBackground">@color/colorPrimaryNight</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@color/colorSecondary</item>
+        <item name="android:textColorPrimaryInverse">@color/colorSecondary</item>
+        <item name="android:colorControlActivated">@android:color/white</item>
     </style>
 </resources>
