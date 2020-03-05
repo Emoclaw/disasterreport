@@ -63,7 +63,7 @@ public class DisasterRepository {
         @Override
         protected Void doInBackground(final Earthquake... params) {
             //Only insert Earthquake if contents are different. Requires OnConflictStrategy.REPLACE
-            if (mAsyncTaskDao.getEarthquakeById(params[0].getId()) != null ||
+            if (mAsyncTaskDao.getEarthquakeById(params[0].getId()) == null ||
                     mAsyncTaskDao.getEarthquakeById(params[0].getId()).getUpdatedDate() != params[0].getUpdatedDate())
                         mAsyncTaskDao.insertEarthquake(params[0]);
             return null;
