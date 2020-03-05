@@ -10,7 +10,7 @@ import java.util.List;
 
 @Dao
 public interface DisasterDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertEarthquake(Earthquake earthquake);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -31,8 +31,11 @@ public interface DisasterDao {
     LiveData<List<Earthquake>> getFilteredEarthquakesWithSearch(double minMag, double maxMag, long startDate, long endDate, double circleFilterRadius, String query);
 
     @Query("SELECT * from earthquake_table WHERE id == :id")
-    Earthquake findEarthquakeById(String id);
+    Earthquake getEarthquakeById(String id);
 
     @Query("SELECT * from hurricane_table ORDER BY time DESC")
     LiveData<List<Hurricane>> getHurricanes();
+
+    @Query("SELECT * from hurricane_table WHERE SID == :id")
+    Hurricane getHurricaneById(String id);
 }

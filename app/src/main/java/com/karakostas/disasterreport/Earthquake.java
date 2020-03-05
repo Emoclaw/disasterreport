@@ -16,7 +16,7 @@ public class Earthquake {
 
         @Override
         public boolean areContentsTheSame(@NonNull Earthquake oldItem, @NonNull Earthquake newItem) {
-            return true;
+            return oldItem.getUpdatedDate() == newItem.getUpdatedDate();
         }
     };
     @PrimaryKey
@@ -31,7 +31,13 @@ public class Earthquake {
     private Double longitude;
     private Double distanceFromUser;
 
-    public Earthquake(String location, long date, double mag, String URL, @NonNull String id, double latitude, double longitude, double distanceFromUser) {
+    public long getUpdatedDate() {
+        return updatedDate;
+    }
+
+    private long updatedDate;
+
+    public Earthquake(String location, long date, double mag, String URL, @NonNull String id, double latitude, double longitude, double distanceFromUser, long updatedDate) {
         this.date = date;
         this.mag = mag;
         this.URL = URL;
@@ -40,6 +46,7 @@ public class Earthquake {
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceFromUser = distanceFromUser;
+        this.updatedDate = updatedDate;
     }
 
     long getDate() {

@@ -241,6 +241,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
                         JSONObject earthquake = earthquakesArray.getJSONObject(i1);
                         JSONObject properties = earthquake.getJSONObject("properties");
                         long timeInMs = properties.getLong("time");
+                        long updateTimeInMs = properties.getLong("updated");
                         location = properties.getString("place");
                         double mag = properties.getDouble("mag");
                         mag = Math.round(mag * 10) / 10d;
@@ -253,7 +254,7 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
                         double distanceFromUser = DisasterUtils.HaversineInKM(latitude, longitude, userLatitude, userLongitude);
                         if (MainActivity.DEBUG_MODE)
                             Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + userLatitude + " UserLongitude: " + userLongitude);
-                        earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser));
+                        earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser,updateTimeInMs));
                     }
 
                 } catch (JSONException e) {

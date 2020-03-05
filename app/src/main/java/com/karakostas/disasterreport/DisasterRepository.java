@@ -62,7 +62,10 @@ public class DisasterRepository {
 
         @Override
         protected Void doInBackground(final Earthquake... params) {
-            mAsyncTaskDao.insertEarthquake(params[0]);
+            //Only insert Earthquake if contents are different. Requires OnConflictStrategy.REPLACE
+            if (mAsyncTaskDao.getEarthquakeById(params[0].getId()) != null ||
+                    mAsyncTaskDao.getEarthquakeById(params[0].getId()).getUpdatedDate() != params[0].getUpdatedDate())
+                        mAsyncTaskDao.insertEarthquake(params[0]);
             return null;
         }
     }
@@ -77,7 +80,10 @@ public class DisasterRepository {
 
         @Override
         protected Void doInBackground(final Hurricane... params) {
-            mAsyncTaskDao.insertHurricane(params[0]);
+            //Only insert Hurricane if contents are different. Requires OnConflictStrategy.REPLACE
+            if (mAsyncTaskDao.getHurricaneById(params[0].getSID()) == null ||
+                    mAsyncTaskDao.getHurricaneById(params[0].getSID()).getLatitudeList().size() != params[0].getLatitudeList().size())
+                        mAsyncTaskDao.insertHurricane(params[0]);
             return null;
         }
     }

@@ -61,6 +61,7 @@ public class NotificationWorker extends Worker {
                 JSONObject earthquake = earthquakesArray.getJSONObject(i);
                 JSONObject properties = earthquake.getJSONObject("properties");
                 long timeInMs = properties.getLong("time");
+                long updatedTimeInMs = properties.getLong("updated");
                 location = properties.getString("place");
                 double mag = properties.getDouble("mag");
                 mag = Math.round(mag * 10) / 10d;
@@ -73,14 +74,14 @@ public class NotificationWorker extends Worker {
                 double distanceFromUser = DisasterUtils.HaversineInKM(latitude, longitude, mLatitude, mLongitude);
                 if (MainActivity.DEBUG_MODE)
                     Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + mLatitude + " UserLongitude: " + mLongitude);
-                mList.add(new Earthquake(location,timeInMs,mag,detailsURL,id,latitude,longitude,distanceFromUser));
+                mList.add(new Earthquake(location,timeInMs,mag,detailsURL,id,latitude,longitude,distanceFromUser,updatedTimeInMs));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         int count = 0;
         for (int i = mList.size() - 1; i >= 0; i--) {
-            if (dao.findEarthquakeById(mList.get(i).getId()) == null) {
+            if (dao.getEarthquakeById(mList.get(i).getId()) == null) {
                 count++;
                 createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred", count,mList.get(i).getDate(),mList.get(i).getURL());
                 dao.insertEarthquake(mList.get(i));

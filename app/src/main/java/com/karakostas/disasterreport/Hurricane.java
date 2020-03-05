@@ -58,12 +58,12 @@ public class Hurricane {
     public static DiffUtil.ItemCallback<Hurricane> DIFF_CALLBACK = new DiffUtil.ItemCallback<Hurricane>() {
         @Override
         public boolean areItemsTheSame(@NonNull Hurricane oldItem, @NonNull Hurricane newItem) {
-            return false;
+            return oldItem.getSID().equals(newItem.getSID());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Hurricane oldItem, @NonNull Hurricane newItem) {
-            return false;
+            return oldItem.getLatitudeList().size() == newItem.getLatitudeList().size();
         }
     };
 
