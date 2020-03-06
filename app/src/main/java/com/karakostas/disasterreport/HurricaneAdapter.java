@@ -96,7 +96,9 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
                 //Map info
                 Hurricane hurricane = (Hurricane) mapView.getTag();
                 gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0))));
-                Glide.with(mContext).asBitmap().load(R.drawable.ic_hurricane).into(new CustomTarget<Bitmap>(wh,wh) {
+                //Change marker icon based on whether Night Mode is enabled
+                int drawable = mAdapter.nightMode ? R.drawable.ic_hurricane_orange : R.drawable.ic_hurricane;
+                Glide.with(mContext).asBitmap().load(drawable).into(new CustomTarget<Bitmap>(wh,wh) {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         gMap.addMarker(new MarkerOptions()

@@ -3,8 +3,8 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimaryNight</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryNight</item>
+        <item name="colorPrimary">@color/colorBackground</item>
+        <item name="colorPrimaryDark">@color/colorBackground</item>
         <item name="colorAccent">@color/colorSecondary</item>
         <item name="drawerArrowStyle">@style/DrawerIcon</item>
         <item name="android:textColorHint">#8FFFFFFF</item>
@@ -12,7 +12,7 @@
     </style>
 
     <style name="ActionBarThemeOverlay">
-        <item name="background">@color/colorPrimaryNight</item>
+        <item name="background">@color/colorBackground</item>
         <item name="android:textColorPrimary">#FFF</item>
         <item name="android:textColorSecondary">#fff</item>
         <item name="searchViewStyle">@style/SearchViewStyle</item>
@@ -23,17 +23,17 @@
     </style>
 
     <style name="SettingsActivityTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorPrimaryNight</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryNight</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="colorPrimary">@color/colorBackground</item>
+        <item name="colorPrimaryDark">@color/colorBackground</item>
+        <item name="android:background">@color/colorBackground</item>
         <item name="android:textColorPrimary">@color/text_color_selector</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
         <item name="colorAccent">@color/colorSecondary</item>
     </style>
 
     <style name="DetailsActivityTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/colorPrimaryNight</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryNight</item>
+        <item name="colorPrimary">@color/colorBackground</item>
+        <item name="colorPrimaryDark">@color/colorBackground</item>
         <item name="colorAccent">@color/colorSecondary</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:actionBarStyle">@style/DetailsActivityActionBar</item>
@@ -47,7 +47,7 @@
         <!-- Gets rid of the search icon -->
         <item name="searchIcon">@drawable/ic_search_white</item>
         <!-- Gets rid of the "underline" in the text -->
-        <item name="queryBackground">@color/colorPrimaryNight</item>
+        <item name="queryBackground">@color/colorBackground</item>
         <!-- Gets rid of the search icon when the SearchView is expanded -->
         <item name="searchHintIcon">@null</item>
         <item name="android:textColorHint">#FFFFFF</item>
@@ -64,12 +64,12 @@
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorBackground</item>
     </style>
     <style name="EarthquakeFilterConstraintLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">520dp</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorBackground</item>
         <item name="android:minWidth">330dp</item>
         <item name="android:minHeight">500dp</item>
     </style>
@@ -86,7 +86,7 @@
     <style name="EarthquakeFiltersTitleTextView">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">39dp</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorBackground</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:textColor">#ffffff</item>
@@ -104,7 +104,7 @@
     <style name="FragmentConstraintLayoutStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorBackground</item>
         <item name="android:layout_height">match_parent</item>
     </style>
 
@@ -112,7 +112,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">start</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
+        <item name="android:background">@color/colorBackground</item>
         <item name="itemTextColor">@android:color/white</item>
     </style>
 
@@ -139,9 +139,9 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
     <style name="datePicker" parent="ThemeOverlay.AppCompat.Dialog">
-        <item name="colorAccent">@color/colorPrimaryNight</item>
-        <item name="android:background">@color/colorPrimaryNight</item>
-        <item name="android:windowBackground">@color/colorPrimaryNight</item>
+        <item name="colorAccent">@color/colorBackground</item>
+        <item name="android:background">@color/colorBackground</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@color/colorSecondary</item>
         <item name="android:textColorPrimaryInverse">@color/colorSecondary</item>

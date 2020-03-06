@@ -3,19 +3,19 @@ package com.karakostas.disasterreport;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.gms.maps.model.LatLng;
 import com.univocity.parsers.common.ParsingContext;
 import com.univocity.parsers.common.processor.AbstractRowProcessor;
@@ -24,9 +24,6 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +34,7 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     private HurricaneViewModel hurricaneViewModel;
     Context mContext;
     HurricaneAdapter adapter;
+    SwipeRefreshLayout mSwipeRefreshLayout;
     public HurricaneFragment() {
         // Required empty public constructor
     }
@@ -58,7 +56,9 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView mRecyclerView = view.findViewById(R.id.recyclerView_hurricane);
-
+        mSwipeRefreshLayout = view.findViewById(R.id.swipe);
+        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorAccent));
+        mSwipeRefreshLayout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(mContext,R.color.colorBackground));
         mRecyclerView.setHasFixedSize(true);
         adapter = new HurricaneAdapter();
         hurricaneViewModel = new ViewModelProvider(this).get(HurricaneViewModel.class);
@@ -75,12 +75,13 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
     @NonNull
     @Override
     public Loader<File> onCreateLoader(int id, @Nullable Bundle args) {
+        mSwipeRefreshLayout.setRefreshing(true);
         return new HurricaneLoader(mContext);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<File> loader, File data) {
-
+        mSwipeRefreshLayout.setRefreshing(false);
         //Read & parse the csv file
         //TODO: Determine needed columns
         CsvParserSettings settings = new CsvParserSettings();
@@ -105,7 +106,8 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
                 latitudeList.add(Float.parseFloat(row[8]));
                 longitudeList.add(Float.parseFloat(row[9]));
                 locationList.add(new LatLng(Float.parseFloat(row[8]), Float.parseFloat(row[9])));
-                timeList.add(row[6]);
+                //Remove last 3 characters, which contain the seconds (useless)
+                timeList.add(row[6].substring(0,row[6].length() - 3));
                 nameList.add(row[5]);
                 if (i != 0 && !row[0].equals(sidList.get(i - 1))) {
                     hurricaneViewModel.insert(new Hurricane(sidList.get(i - 1), nameList.get(i - 1), latitudeList, longitudeList, timeList));

@@ -135,8 +135,8 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         });
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipe);
-        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorPrimary), ContextCompat.getColor(mContext, R.color.colorSecondary));
-
+        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorAccent));
+        mSwipeRefreshLayout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(mContext,R.color.colorBackground));
         FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(view1 -> mLayoutManager.scrollToPosition(0));
         mRecyclerView.setHasFixedSize(true);

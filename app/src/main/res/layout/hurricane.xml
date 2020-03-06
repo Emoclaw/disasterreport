@@ -1,72 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    app:cardCornerRadius="4dp"
+    android:layout_marginTop="4dp"
     android:layout_marginBottom="8dp"
-    android:layout_height="250dp">
-    <com.google.android.gms.maps.MapView
-        android:layout_width="match_parent"
-        android:id="@+id/hurricane_mapview"
-        app:liteMode="true"
-        app:cameraZoom="3"
-        app:mapType="normal"
-        android:layout_height="190dp"/>
+    app:cardElevation="3dp"
+    android:layout_width="match_parent">
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/speed_hurricane"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:textColor="#333333"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        tools:text="68" />
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
+        android:layout_height="match_parent">
+        <com.google.android.gms.maps.MapView
+            android:layout_width="match_parent"
+            android:id="@+id/hurricane_mapview"
+            app:liteMode="true"
+            app:cameraZoom="3"
+            app:mapType="normal"
+            android:layout_height="190dp"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/name_hurricane"
+            android:id="@+id/speed_hurricane"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:textSize="12sp"
-
+            android:layout_marginBottom="16dp"
+            android:textColor="#333333"
+            android:textSize="20sp"
             android:textStyle="bold"
-            tools:text="Hurricane Kyriakos" />
-
-        <TextView
-            android:id="@+id/date_textView_hurricane"
+            tools:text="68" />
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:layout_marginStart="16dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/colorPrimary"
-            android:textSize="12sp"
-            tools:text="2019-05-27" />
+            <TextView
+                android:id="@+id/name_hurricane"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:textSize="12sp"
 
+                android:textStyle="bold"
+                tools:text="Hurricane Kyriakos" />
+
+            <TextView
+                android:id="@+id/date_textView_hurricane"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/colorDate"
+                android:layout_marginBottom="8dp"
+                android:textSize="12sp"
+                tools:text="2019-05-27" />
+
+        </LinearLayout>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginEnd="12dp"
+            android:adjustViewBounds="false"
+            android:gravity="end"
+            android:src="@drawable/ic_arrow_right_orange"/>
+        </LinearLayout>
     </LinearLayout>
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="12dp"
-        android:adjustViewBounds="false"
-        android:gravity="end"
-        android:src="@drawable/ic_arrow_right_orange"/>
-    </LinearLayout>
-</LinearLayout>
+</androidx.cardview.widget.CardView>

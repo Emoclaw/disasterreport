@@ -6,7 +6,7 @@
 
     <color name="cyanLight">#eaeeee</color>
     <color name="colorAccent30">#1a63a4ff</color>
-    <color name="colorPrimaryNight">#000000</color>
+    <color name="colorBackground">#FFFFFF</color>
     <color name="mag0">#121200</color>
     <color name="mag0_5">#353811</color>
     <color name="mag1">#5c6117</color>
@@ -21,5 +21,6 @@
     <color name="colorSecondary">#FF6C00</color>
     <color name="colorSecondary30">#40ff6c00</color>
     <color name="veryRed">#FF0000</color>
+    <color name="colorDate">#1976d2</color>
     <color name="veryRed30">#40ff0000</color>
 </resources>
