@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
             float minMag = earthquakePrefs.getFloat("min_mag",2);
             float maxMag = earthquakePrefs.getFloat("max_mag",11);
             int selectedDateRadio = earthquakePrefs.getInt("selected_date_radio",0);
-            long startDate = pref.getLong("start_date",System.currentTimeMillis() - 86400000L);
-            long endDate = pref.getLong("end_date",System.currentTimeMillis() + 86400000L);
+            long startDate = earthquakePrefs.getLong("start_date",System.currentTimeMillis() - 86400000L);
+            long endDate = earthquakePrefs.getLong("end_date",System.currentTimeMillis() + 86400000L);
             float maxRadius = earthquakePrefs.getFloat("max_radius",180);
             showDialog(minMag,maxMag,selectedDateRadio,startDate,
                     endDate,maxRadius,
