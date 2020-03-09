@@ -3,6 +3,7 @@ package com.karakostas.disasterreport;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,6 @@ import java.util.List;
 
 
 public class HurricaneFragment extends Fragment implements LoaderManager.LoaderCallbacks<File> {
-    List<String[]> list;
     List<Hurricane> mList = new ArrayList<>();
     private HurricaneViewModel hurricaneViewModel;
     Context mContext;
@@ -91,7 +91,9 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
         settings.setSkipEmptyLines(true);
         settings.setReadInputOnSeparateThread(true);
         settings.setNumberOfRowsToSkip(2);
-        settings.setProcessor(new ConcurrentRowProcessor(new AbstractRowProcessor() {
+
+        settings.setProcessor(new AbstractRowProcessor() {
+
             ArrayList<Float> latitudeList = new ArrayList<>(100);
             ArrayList<Float> longitudeList = new ArrayList<>(100);
             ArrayList<String> timeList = new ArrayList<>(100);
@@ -121,7 +123,7 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
                     i++;
                 }
             }
-        }));
+        });
         CsvParser parser = new CsvParser(settings);
         parser.parse(data);
     }
