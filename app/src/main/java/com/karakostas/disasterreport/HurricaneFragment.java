@@ -125,7 +125,12 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
             }
         });
         CsvParser parser = new CsvParser(settings);
-        parser.parse(data);
+        //long time = System.nanoTime();
+        new Thread(() -> {
+            parser.parse(data);
+        }).start();
+        //time = System.nanoTime() - time;
+        //Log.d("Benchmark",time + " ns");
     }
 
     @Override
