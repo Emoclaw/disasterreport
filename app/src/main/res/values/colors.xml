@@ -3,7 +3,6 @@
     <color name="colorPrimary">#1976d2</color>
     <color name="colorPrimaryDark">#004ba0</color>
     <color name="colorAccent">#63a4ff</color>
-
     <color name="cyanLight">#eaeeee</color>
     <color name="colorAccent30">#1a63a4ff</color>
     <color name="colorBackground">#FFFFFF</color>
@@ -23,4 +22,10 @@
     <color name="veryRed">#FF0000</color>
     <color name="colorDate">#1976d2</color>
     <color name="veryRed30">#40ff0000</color>
+<!--hurricanes-->
+    <color name="category_1">#5c6117</color>
+    <color name="category_2">#b9bd17</color>
+    <color name="category_3">#ffd000</color>
+    <color name="category_4">#ff8700</color>
+    <color name="category_5">#ff0000</color>
 </resources>

@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.*;
 
 public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.ViewHolder> {
     boolean nightMode = false;
+    private Context mContext;
     protected HurricaneAdapter() {
         super(Hurricane.DIFF_CALLBACK);
     }
@@ -31,6 +32,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         nightMode = PreferenceManager.getDefaultSharedPreferences(parent.getContext()).getBoolean("night_mode_switch",false);
         View view = layoutInflater.inflate(R.layout.hurricane, parent, false);
+        mContext = parent.getContext();
         return new HurricaneAdapter.ViewHolder(view, this);
     }
 
@@ -45,8 +47,32 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Hurricane hurricane = getItem(position);
+        int color;
+        String category;
+        float speed = hurricane.getActiveSpeed();
+        if (speed < 153){
+            color = R.color.category_1;
+            category = "Cat. 1";
+        } else if (speed < 177) {
+            color = R.color.category_2;
+            category = "Cat. 2";
+        } else if (speed < 208) {
+            color = R.color.category_3;
+            category = "Cat. 3";
+        } else if (speed < 251) {
+            color = R.color.category_4;
+            category = "Cat. 4";
+        } else {
+            color = R.color.category_5;
+            category = "Cat. 5";
+        }
+        String status = hurricane.isActive()?"(Active)":"(Inactive)";
         holder.nameTextView.setText(hurricane.getName());
         holder.dateTextView.setText(hurricane.getTimeList().get(0));
+        holder.speedTextView.setTextColor(ContextCompat.getColor(mContext,color));
+        holder.categoryTextView.setText(category + " " + status);
+        //holder.speedUnitTextView.setTextColor(ContextCompat.getColor(mContext,color));
+        holder.speedTextView.setText(String.format("%.1f",speed));
         holder.mapView.setTag(getItem(position));
         holder.setMapSettings();
     }
@@ -54,6 +80,9 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
         final TextView nameTextView;
         final TextView dateTextView;
+        final TextView speedTextView;
+        final TextView categoryTextView;
+        //final TextView speedUnitTextView;
         private Context mContext;
         HurricaneAdapter mAdapter;
         int wh;
@@ -66,6 +95,9 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
             mapView.setClickable(false);
             nameTextView = itemView.findViewById(R.id.name_hurricane);
             dateTextView = itemView.findViewById(R.id.date_textView_hurricane);
+            speedTextView = itemView.findViewById(R.id.speed_hurricane);
+            categoryTextView = itemView.findViewById(R.id.hurricane_category);
+            //speedUnitTextView = itemView.findViewById(R.id.speed_unit_hurricane);
             mAdapter = adapter;
 
             //Glide uses px sizes, convert dp to px.
