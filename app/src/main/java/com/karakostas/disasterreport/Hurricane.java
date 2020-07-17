@@ -18,7 +18,8 @@ public class Hurricane {
     String name;
     String time;
     boolean isActive;
-    float activeSpeed;
+    float lastSpeed;
+    float averageSpeed;
     @TypeConverters(HurricaneConverters.class)
     ArrayList<String> timeList = new ArrayList<>();
     @TypeConverters(HurricaneConverters.class)
@@ -29,7 +30,7 @@ public class Hurricane {
     ArrayList<Float> speedList = new ArrayList<>();
 
 
-    public Hurricane(@NonNull String SID, String name, ArrayList<Float> latitudeList, ArrayList<Float> longitudeList, ArrayList<String> timeList, ArrayList<Float> speedList, boolean isActive){
+    public Hurricane(@NonNull String SID, String name, ArrayList<Float> latitudeList, ArrayList<Float> longitudeList, ArrayList<String> timeList, ArrayList<Float> speedList, boolean isActive, float averageSpeed){
         this.SID = SID;
         this.latitudeList.addAll(latitudeList);
         this.name = name;
@@ -38,7 +39,8 @@ public class Hurricane {
         this.time = timeList.get(0);
         this.speedList.addAll(speedList);
         this.isActive = isActive;
-        activeSpeed = speedList.get(speedList.size()-1);
+        lastSpeed = speedList.get(speedList.size()-1);
+        this.averageSpeed = averageSpeed;
     }
 
     @NonNull
@@ -76,9 +78,12 @@ public class Hurricane {
         }
     };
 
+    public float getAverageSpeed() {
+        return averageSpeed;
+    }
 
-    public float getActiveSpeed() {
-        return activeSpeed;
+    public float getLastSpeed() {
+        return lastSpeed;
     }
 
     public ArrayList<Float> getSpeedList() {

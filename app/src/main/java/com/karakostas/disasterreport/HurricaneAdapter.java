@@ -49,7 +49,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
         Hurricane hurricane = getItem(position);
         int color;
         String category;
-        float speed = hurricane.getActiveSpeed();
+        float speed = hurricane.getAverageSpeed();
         if (speed < 153){
             color = R.color.category_1;
             category = "Cat. 1";

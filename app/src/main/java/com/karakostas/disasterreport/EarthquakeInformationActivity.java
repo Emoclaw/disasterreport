@@ -65,7 +65,9 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
         completeLocationString = locationString;
         if (locationString != null) {
             locationString = locationString.replaceAll("\\d", "");
+
             locationString = locationString.replaceAll("\\([^()]*\\)", "");
+
             locationString = locationString.replaceAll("[()]", "");
             if (locationString.contains(" of ")) {
                 String[] locationFin = locationString.split(" of ");

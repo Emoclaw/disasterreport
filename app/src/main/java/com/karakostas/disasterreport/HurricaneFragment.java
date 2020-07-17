@@ -18,13 +18,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.gms.maps.model.LatLng;
-import com.univocity.parsers.common.ParsingContext;
-import com.univocity.parsers.common.processor.AbstractRowProcessor;
-import com.univocity.parsers.common.processor.ConcurrentRowProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,9 +60,16 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
         mSwipeRefreshLayout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(mContext,R.color.colorBackground));
         mRecyclerView.setHasFixedSize(true);
         adapter = new HurricaneAdapter();
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                mRecyclerView.scrollToPosition(0);
+            }
+        });
         hurricaneViewModel = new ViewModelProvider(this).get(HurricaneViewModel.class);
-        hurricaneViewModel.getHurricanes().observe(getViewLifecycleOwner(), earthquakes -> {
-            mList = earthquakes;
+        hurricaneViewModel.getHurricanes().observe(getViewLifecycleOwner(), hurricanes -> {
+            mList = hurricanes;
             adapter.submitList(mList);
         });
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
@@ -85,52 +91,59 @@ public class HurricaneFragment extends Fragment implements LoaderManager.LoaderC
         //Read & parse the csv file
         //TODO: Determine needed columns
         CsvParserSettings settings = new CsvParserSettings();
-        //settings.selectFields("SID","NAME","LAT","LON","ISO_TIME","DIST2LAND");
-        settings.selectIndexes(0, 5, 8, 9, 6, 14);
+        //settings.selectFields(0 = "SID",5 = "NAME",6 = "ISO_TIME",8 = "LAT",9 = "LON",13 = "DIST2LAND",14 = "TRACK_TYPE",22 = "USA_STATUS",161 = "STORM_SPEED");
+        settings.selectIndexes(0, 5,6, 8, 9, 13, 14, 22, 161);
         settings.setColumnReorderingEnabled(false);
         settings.setSkipEmptyLines(true);
         settings.setReadInputOnSeparateThread(true);
         settings.setNumberOfRowsToSkip(2);
-
-        settings.setProcessor(new AbstractRowProcessor() {
-
+        CsvParser parser = new CsvParser(settings);
+        long time = System.nanoTime();
+        new Thread(() -> {
+            List<String[]> mList = null;
+            try {
+                mList = parser.parseAll(new FileReader(data));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             ArrayList<Float> latitudeList = new ArrayList<>(100);
             ArrayList<Float> longitudeList = new ArrayList<>(100);
             ArrayList<String> timeList = new ArrayList<>(100);
             ArrayList<String> sidList = new ArrayList<>(100);
             ArrayList<String> nameList = new ArrayList<>(100);
             ArrayList<LatLng> locationList = new ArrayList<>(100);
+            ArrayList<Float> speedList = new ArrayList<>(100);
+            assert mList != null;
             int i = 0;
-
-            @Override
-            public void rowProcessed(String[] row, ParsingContext context) {
-                sidList.add(row[0]);
-                latitudeList.add(Float.parseFloat(row[8]));
-                longitudeList.add(Float.parseFloat(row[9]));
-                locationList.add(new LatLng(Float.parseFloat(row[8]), Float.parseFloat(row[9])));
-                //Remove last 3 characters, which contain the seconds (useless)
-                timeList.add(row[6].substring(0,row[6].length() - 3));
-                nameList.add(row[5]);
-                if (i != 0 && !row[0].equals(sidList.get(i - 1))) {
-                    hurricaneViewModel.insert(new Hurricane(sidList.get(i - 1), nameList.get(i - 1), latitudeList, longitudeList, timeList));
+            float sumSpeed = 0;
+            for (i = 0; i < mList.size()-1; i++){
+                latitudeList.add(Float.parseFloat(mList.get(i)[8]));
+                longitudeList.add(Float.parseFloat(mList.get(i)[9]));
+                timeList.add(mList.get(i)[6]);
+                sidList.add(mList.get(i)[0]);
+                nameList.add(mList.get(i)[5]);
+                speedList.add((float) (Float.parseFloat(mList.get(i)[161]) * 1.852));
+                sumSpeed += (float) (Float.parseFloat(mList.get(i)[161]) * 1.852);
+                locationList.add(new LatLng(Float.parseFloat(mList.get(i)[8]),Float.parseFloat(mList.get(i)[9])));
+                if (!mList.get(i)[0].equals(mList.get(i+1)[0])){
+                    float averageSpeed = sumSpeed/speedList.size();
+                    sumSpeed = 0;
+                    hurricaneViewModel.insert(new Hurricane(mList.get(i)[0],mList.get(i)[5],latitudeList,longitudeList,timeList,speedList,false,averageSpeed));
                     latitudeList.clear();
                     longitudeList.clear();
                     timeList.clear();
                     sidList.clear();
                     nameList.clear();
-                    i = 0;
-                } else {
-                    i++;
+                    speedList.clear();
+                    locationList.clear();
                 }
             }
-        });
-        CsvParser parser = new CsvParser(settings);
-        //long time = System.nanoTime();
-        new Thread(() -> {
-            parser.parse(data);
-        }).start();
-        //time = System.nanoTime() - time;
-        //Log.d("Benchmark",time + " ns");
+            //Insert the last Hurricane in the list
+            float averageSpeed = sumSpeed/speedList.size();
+            hurricaneViewModel.insert(new Hurricane(mList.get(i)[0],mList.get(i)[5],latitudeList,longitudeList,timeList,speedList,false,averageSpeed));
+           }).start();
+        time = System.nanoTime() - time;
+        Log.d("Benchmark",time + " ns");
     }
 
     @Override
