@@ -17,13 +17,15 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +38,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class EarthquakeFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>, MainActivity.sendDataToFragment {
+public class EarthquakeFragment extends Fragment implements MainActivity.sendDataToFragment {
     private List<Earthquake> mList = new ArrayList<>();
     private Context mContext;
     private EarthquakeViewModel earthquakeViewModel;
@@ -80,13 +82,11 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
         mSwipeRefreshLayout.setRefreshing(true);
         if (isConnected()) {
             Bundle queryBundle = new Bundle();
-            String stringStartDate = "";
-            String stringEndDate = "";
             TimeZone timeZone = TimeZone.getDefault();
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
             format.setTimeZone(timeZone);
-            stringStartDate = format.format(new Date(startDate));
-            stringEndDate = format.format(new Date(endDate));
+            String stringStartDate = format.format(new Date(startDate));
+            String stringEndDate = format.format(new Date(endDate));
             String minimumMagnitude = Double.toString(minMag);
             String maximumMagnitude = Double.toString(maxMag);
             String stringLatitude = Double.toString(latitude);
@@ -101,10 +101,86 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
             queryBundle.putString("longitude", stringLongitude);
             queryBundle.putString("maxradius", stringMaxRadius);
             mRecyclerView.setVisibility(View.VISIBLE);
-            LoaderManager.getInstance(this).restartLoader(0, queryBundle, this);
-        } else {
-            mSwipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(mContext, "Failed to get data. Check your Internet connection.", Toast.LENGTH_LONG).show();
+            //Get JSON data using Schedulers.io() thread, parse it using Schedulers.computation()
+            //TODO: Split to functions for readability
+            Single.create((SingleOnSubscribe<String>) emitter -> {
+                String s = DisasterUtils.getEarthquakeData(stringStartDate, stringEndDate, minimumMagnitude, maximumMagnitude, stringLatitude, stringLongitude, stringMaxRadius);
+                emitter.onSuccess(s);
+            }).subscribeOn(Schedulers.io()).observeOn(Schedulers.computation()).subscribe(new SingleObserver<String>() {
+                @Override
+                public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {
+
+                }
+
+                @Override
+                public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull String s) {
+                    //Chain single -> completable to switch threads
+                    Completable.create(emitter -> {
+                        if (s.contains("Error 400")) {
+                            Toast.makeText(mContext, "Current filter criteria has results that exceed the limit of USGS (20000). Try narrowing your filter range.", Toast.LENGTH_LONG).show();
+                        } else {
+                            try {
+                                //JSON parsing
+                                //TODO: Convert to Retrofit
+                                JSONObject jsonObject = new JSONObject(s);
+                                final JSONArray earthquakesArray = jsonObject.getJSONArray("features");
+                                String location;
+                                double userLatitude = Double.longBitsToDouble(pref.getLong("location_latitude", 0));
+                                double userLongitude = Double.longBitsToDouble(pref.getLong("location_longitude", 0));
+                                for (int i1 = 0; i1 < earthquakesArray.length(); i1++) {
+                                    JSONObject earthquake = earthquakesArray.getJSONObject(i1);
+                                    JSONObject properties = earthquake.getJSONObject("properties");
+                                    long timeInMs = properties.getLong("time");
+                                    long updateTimeInMs = properties.getLong("updated");
+                                    location = properties.getString("place");
+                                    double mag = properties.getDouble("mag");
+                                    mag = Math.round(mag * 10) / 10d;
+                                    String detailsURL = properties.getString("detail");
+                                    String id = earthquake.getString("id");
+                                    JSONObject geometry = earthquake.getJSONObject("geometry");
+                                    JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
+                                    double elatitude = JSONCoordinates.getDouble(1);
+                                    double elongitude = JSONCoordinates.getDouble(0);
+                                    double distanceFromUser = DisasterUtils.HaversineInKM(elatitude, elongitude, userLatitude, userLongitude);
+                                    if (MainActivity.DEBUG_MODE)
+                                        Log.d("Coords", "Latitude: " + elatitude + " Longitude: " + elongitude + "\n UserLatitude: " + userLatitude + " UserLongitude: " + userLongitude);
+                                    earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, elatitude, elongitude, distanceFromUser, updateTimeInMs));
+                                }
+                            } catch (JSONException e) {
+                                emitter.onError(e);
+                            }
+                        }
+                        emitter.onComplete();
+                    }).subscribeOn(Schedulers.computation())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new CompletableObserver() {
+                        @Override
+                        public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mRecyclerView.scrollToPosition(0);
+                        }
+
+                        @Override
+                        public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+
+
+
+            });
         }
     }
 
@@ -199,76 +275,8 @@ public class EarthquakeFragment extends Fragment implements LoaderManager.Loader
 
     }
 
-    @NonNull
-    @Override
-    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        String stringStartDate = null;
-        String stringEndDate = null;
-        String maxMag = null;
-        String minMag = null;
-        String latitude = null;
-        String longitude = null;
-        String maxradius = null;
-        if (args != null) {
-            stringStartDate = args.getString("startDate");
-            stringEndDate = args.getString("endDate");
-            minMag = args.getString("minMag");
-            maxMag = args.getString("maxMag");
-            latitude = args.getString("latitude");
-            longitude = args.getString("longitude");
-            maxradius = args.getString("maxradius");
-        }
-        return new EarthquakeLoader(mContext, stringStartDate, stringEndDate, minMag, maxMag, latitude, longitude, maxradius);
-    }
 
-    @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
 
-        if (data.contains("Error 400")) {
-            Toast.makeText(mContext, "Current filter criteria has results that exceed the limit of USGS (20000). Try narrowing your filter range.", Toast.LENGTH_LONG).show();
-            mSwipeRefreshLayout.setRefreshing(false);
-        } else {
-            mSwipeRefreshLayout.setRefreshing(false);
-            int i = 0;
-            new Thread(() -> {
-                try {
-                    JSONObject jsonObject = new JSONObject(data);
-                    final JSONArray earthquakesArray = jsonObject.getJSONArray("features");
-                    String location;
-                    double userLatitude = Double.longBitsToDouble(pref.getLong("location_latitude",0));
-                    double userLongitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
-                    for (int i1 = 0; i1 < earthquakesArray.length(); i1++) {
-                        JSONObject earthquake = earthquakesArray.getJSONObject(i1);
-                        JSONObject properties = earthquake.getJSONObject("properties");
-                        long timeInMs = properties.getLong("time");
-                        long updateTimeInMs = properties.getLong("updated");
-                        location = properties.getString("place");
-                        double mag = properties.getDouble("mag");
-                        mag = Math.round(mag * 10) / 10d;
-                        String detailsURL = properties.getString("detail");
-                        String id = earthquake.getString("id");
-                        JSONObject geometry = earthquake.getJSONObject("geometry");
-                        JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
-                        double latitude = JSONCoordinates.getDouble(1);
-                        double longitude = JSONCoordinates.getDouble(0);
-                        double distanceFromUser = DisasterUtils.HaversineInKM(latitude, longitude, userLatitude, userLongitude);
-                        if (MainActivity.DEBUG_MODE)
-                            Log.d("Coords", "Latitude: " + latitude + " Longitude: " + longitude + "\n UserLatitude: " + userLatitude + " UserLongitude: " + userLongitude);
-                        earthquakeViewModel.insert(new Earthquake(location, timeInMs, mag, detailsURL, id, latitude, longitude, distanceFromUser,updateTimeInMs));
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-            if (MainActivity.DEBUG_MODE) Log.v("tag", "Items: " + i);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
-
-    }
     String mSearchQuery="";
     @Override
     public void sendData(double minMag, double maxMag, long startDate, long endDate, double latitude, double longitude, float maxradius) {

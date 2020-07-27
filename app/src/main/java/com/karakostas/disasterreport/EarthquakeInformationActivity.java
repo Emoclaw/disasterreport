@@ -9,18 +9,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
 import androidx.preference.PreferenceManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.*;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleObserver;
+import io.reactivex.rxjava3.core.SingleOnSubscribe;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +36,7 @@ import java.util.TimeZone;
 
 import static java.lang.Math.exp;
 
-public class EarthquakeInformationActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, OnMapReadyCallback {
+public class EarthquakeInformationActivity extends AppCompatActivity implements  OnMapReadyCallback {
     String completeLocationString;
     double latitude;
     double longitude;
@@ -45,12 +48,13 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
     private long dateTime;
     boolean nightMode = false;
     SharedPreferences pref;
+    String URL;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_earthquake_information);
         Intent intent = getIntent();
-        String URL = intent.getStringExtra("detailsURL");
+        URL = intent.getStringExtra("detailsURL");
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         nightMode = pref.getBoolean("night_mode_switch",false);
         dateTime = intent.getLongExtra("dateTime", 0);
@@ -80,128 +84,12 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
                 }
             }
         }
-        queryBundle = new Bundle();
-        queryBundle.putString("URL", URL);
 
     }
 
-    @NonNull
-    @Override
-    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        String URL = null;
-        if (args != null) {
-            URL = args.getString("URL");
-        }
-        return new EarthquakeLoader(this, URL);
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        if (MainActivity.DEBUG_MODE) Log.d("JSON", data);
-        try {
-
-            String jsonData = data.replace("depth-type", "depthtype");
-            JSONObject earthquake = new JSONObject((jsonData));
-            JSONObject properties = earthquake.getJSONObject("properties");
-            JSONObject geometry = earthquake.getJSONObject("geometry");
-            JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
-            JSONObject products = properties.getJSONObject("products");
-//            Log.e(this.toString(),products.toString());
-//            JSONArray phaseDataArray = products.getJSONArray("phase-data");
-            JSONArray originArray = products.getJSONArray("origin");
-            JSONObject origin = originArray.getJSONObject(0);
-            JSONObject originProperties = origin.getJSONObject("properties");
-            String depth = originProperties.getString("depth");
-            String magType = properties.getString("magType");
-            String id = earthquake.getString("id");
-            long updateTime = properties.getLong("updated");
-
-            double mag = properties.getDouble("mag");
 
 
-            mag = Math.round(mag * 10) / 10d;
-            double radius = exp((mag / 1.01) - 0.13);
-            if (mag > 9) {
-                radius = radius * 0.4;
-            } else if (mag > 8) {
-                radius = radius * 0.5;
-            } else if (mag > 7.5) {
-                radius = radius * 0.6;
-            }
-            int height = 100;
-            int width = 100;
-            Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.earthquakemarker_darkred);
-            Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-            BitmapDescriptor marker = BitmapDescriptorFactory.fromBitmap(smallMarker);
-            LatLng coords = new LatLng(JSONCoordinates.getDouble(1), JSONCoordinates.getDouble(0));
-            gMap.addMarker(new MarkerOptions().position(coords).title("Your Location").icon(marker));
-            gMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
-            CircleOptions circle = new CircleOptions()
-                    .center(coords)
-                    .fillColor(ContextCompat.getColor(this, R.color.colorSecondary30))
-                    .strokeColor(ContextCompat.getColor(this, R.color.colorSecondary))
-                    .strokeWidth(3)
-                    .radius(radius * 1000);
-            gMap.addCircle(circle);
-            CircleOptions smallerCircle = new CircleOptions()
-                    .center(coords)
-                    .fillColor(ContextCompat.getColor(this, R.color.veryRed30))
-                    .strokeColor(ContextCompat.getColor(this, R.color.veryRed))
-                    .strokeWidth(3)
-                    .radius(radius * 400);
-            gMap.addCircle(smallerCircle);
-            gMap.moveCamera(CameraUpdateFactory.zoomBy(3));
-            gMap.setMinZoomPreference(2);
 
-            zoomInButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    gMap.moveCamera(CameraUpdateFactory.zoomIn());
-                }
-            });
-            zoomOutButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (gMap.getCameraPosition().zoom > 2) {
-                        gMap.moveCamera(CameraUpdateFactory.zoomOut());
-                    }
-                }
-            });
-            ArrayList<String> list = new ArrayList<>();
-            list.add(dateTimeString);
-            list.add(completeLocationString + "\nLat: " + coords.latitude + ", Long: " + coords.longitude);
-            if (MainActivity.DEBUG_MODE) {
-                Log.d("COORDINATES ", "" + coords.latitude + coords.longitude);
-                Log.d("COORDINATESDistance", "" + DisasterUtils.HaversineInKM(coords.latitude, coords.longitude, 40.6375225D, 22.9522647D));
-            }
-            list.add("Magnitude: " + mag + " " + magType);
-            list.add("Depth: " + depth + " km");
-
-            list.add("Tsunami Alert: No");
-            list.add("USGS ID: " + id);
-            list.add("Updated: " + calculateEpoch(updateTime));
-            ArrayList<Integer> iconList = new ArrayList<>();
-            iconList.add(R.drawable.ic_clock);
-            iconList.add(R.drawable.ic_location);
-            iconList.add(R.drawable.mag_icon);
-            iconList.add(R.drawable.ic_depth);
-            iconList.add(R.drawable.ic_tsunami);
-            iconList.add(R.drawable.ic_hash);
-            iconList.add(R.drawable.ic_update);
-            EarthquakeDetailsAdapter adapter = new EarthquakeDetailsAdapter(getApplicationContext(), list, iconList, nightMode);
-            ListView lv = findViewById(R.id.earthquake_listView);
-            lv.setAdapter(adapter);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        LoaderManager.getInstance(this).destroyLoader(1);
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
-
-    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -212,7 +100,123 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
         if (nightMode){
             gMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getApplicationContext(),R.raw.map_night));
         }
-        LoaderManager.getInstance(EarthquakeInformationActivity.this).restartLoader(1, queryBundle, this);
+        Single.create((SingleOnSubscribe<String>) emitter -> {
+
+            emitter.onSuccess(DisasterUtils.getEarthquakeDetails(URL));
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new SingleObserver<String>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+
+            }
+
+            @Override
+            public void onSuccess(@NonNull String s) {
+                if (MainActivity.DEBUG_MODE) Log.d("JSON", s);
+                try {
+                    //JSON parsing
+                    //TODO: Convert to Retrofit
+                    String jsonData = s.replace("depth-type", "depthtype");
+                    JSONObject earthquake = new JSONObject((jsonData));
+                    JSONObject properties = earthquake.getJSONObject("properties");
+                    JSONObject geometry = earthquake.getJSONObject("geometry");
+                    JSONArray JSONCoordinates = geometry.getJSONArray("coordinates");
+                    JSONObject products = properties.getJSONObject("products");
+//            Log.e(this.toString(),products.toString());
+//            JSONArray phaseDataArray = products.getJSONArray("phase-data");
+                    JSONArray originArray = products.getJSONArray("origin");
+                    JSONObject origin = originArray.getJSONObject(0);
+                    JSONObject originProperties = origin.getJSONObject("properties");
+                    String depth = originProperties.getString("depth");
+                    String magType = properties.getString("magType");
+                    String id = earthquake.getString("id");
+                    long updateTime = properties.getLong("updated");
+
+                    double mag = properties.getDouble("mag");
+
+
+                    mag = Math.round(mag * 10) / 10d;
+                    double radius = exp((mag / 1.01) - 0.13);
+                    if (mag > 9) {
+                        radius = radius * 0.4;
+                    } else if (mag > 8) {
+                        radius = radius * 0.5;
+                    } else if (mag > 7.5) {
+                        radius = radius * 0.6;
+                    }
+                    int height = 100;
+                    int width = 100;
+                    Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.earthquakemarker_darkred);
+                    Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+                    BitmapDescriptor marker = BitmapDescriptorFactory.fromBitmap(smallMarker);
+                    LatLng coords = new LatLng(JSONCoordinates.getDouble(1), JSONCoordinates.getDouble(0));
+                    gMap.addMarker(new MarkerOptions().position(coords).title("Your Location").icon(marker));
+                    gMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
+                    CircleOptions circle = new CircleOptions()
+                            .center(coords)
+                            .fillColor(ContextCompat.getColor(getApplicationContext(), R.color.colorSecondary30))
+                            .strokeColor(ContextCompat.getColor(getApplicationContext(), R.color.colorSecondary))
+                            .strokeWidth(3)
+                            .radius(radius * 1000);
+                    gMap.addCircle(circle);
+                    CircleOptions smallerCircle = new CircleOptions()
+                            .center(coords)
+                            .fillColor(ContextCompat.getColor(getApplicationContext(), R.color.veryRed30))
+                            .strokeColor(ContextCompat.getColor(getApplicationContext(), R.color.veryRed))
+                            .strokeWidth(3)
+                            .radius(radius * 400);
+                    gMap.addCircle(smallerCircle);
+                    gMap.moveCamera(CameraUpdateFactory.zoomBy(3));
+                    gMap.setMinZoomPreference(2);
+
+                    zoomInButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            gMap.moveCamera(CameraUpdateFactory.zoomIn());
+                        }
+                    });
+                    zoomOutButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (gMap.getCameraPosition().zoom > 2) {
+                                gMap.moveCamera(CameraUpdateFactory.zoomOut());
+                            }
+                        }
+                    });
+                    ArrayList<String> list = new ArrayList<>();
+                    list.add(dateTimeString);
+                    list.add(completeLocationString + "\nLat: " + coords.latitude + ", Long: " + coords.longitude);
+                    if (MainActivity.DEBUG_MODE) {
+                        Log.d("COORDINATES ", "" + coords.latitude + coords.longitude);
+                        Log.d("COORDINATESDistance", "" + DisasterUtils.HaversineInKM(coords.latitude, coords.longitude, 40.6375225D, 22.9522647D));
+                    }
+                    list.add("Magnitude: " + mag + " " + magType);
+                    list.add("Depth: " + depth + " km");
+
+                    list.add("Tsunami Alert: No");
+                    list.add("USGS ID: " + id);
+                    list.add("Updated: " + calculateEpoch(updateTime));
+                    ArrayList<Integer> iconList = new ArrayList<>();
+                    iconList.add(R.drawable.ic_clock);
+                    iconList.add(R.drawable.ic_location);
+                    iconList.add(R.drawable.mag_icon);
+                    iconList.add(R.drawable.ic_depth);
+                    iconList.add(R.drawable.ic_tsunami);
+                    iconList.add(R.drawable.ic_hash);
+                    iconList.add(R.drawable.ic_update);
+                    EarthquakeDetailsAdapter adapter = new EarthquakeDetailsAdapter(getApplicationContext(), list, iconList, nightMode);
+                    ListView lv = findViewById(R.id.earthquake_listView);
+                    lv.setAdapter(adapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+        });
+        //LoaderManager.getInstance(EarthquakeInformationActivity.this).restartLoader(1, queryBundle, this);
     }
 
     public String calculateEpoch(long time) {
