@@ -24,4 +24,7 @@ public class HurricaneViewModel extends AndroidViewModel {
     void insert(Hurricane hurricane){
         mRepository.insertHurricane(hurricane);
     }
+    void insertAll(List<Hurricane> hurricanes){
+        mRepository.insertAllHurricanes(hurricanes);
+    }
 }
