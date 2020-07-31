@@ -60,6 +60,7 @@ public class HurricaneFragment extends Fragment{
         mSwipeRefreshLayout = view.findViewById(R.id.swipe);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(mContext, R.color.colorAccent));
         mSwipeRefreshLayout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(mContext,R.color.colorBackground));
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {getHurricanes();});
         mRecyclerView.setHasFixedSize(true);
         adapter = new HurricaneAdapter();
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
