@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +20,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleObserver;
-import io.reactivex.rxjava3.core.SingleOnSubscribe;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.json.JSONArray;
@@ -38,10 +36,9 @@ import static java.lang.Math.exp;
 
 public class EarthquakeInformationActivity extends AppCompatActivity implements  OnMapReadyCallback {
     String completeLocationString;
-    double latitude;
-    double longitude;
+
     private GoogleMap gMap;
-    private Bundle queryBundle;
+    
     private Button zoomOutButton;
     private Button zoomInButton;
     private String dateTimeString;
@@ -100,10 +97,10 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
         if (nightMode){
             gMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getApplicationContext(),R.raw.map_night));
         }
-        Single.create((SingleOnSubscribe<String>) emitter -> {
-
-            emitter.onSuccess(DisasterUtils.getEarthquakeDetails(URL));
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new SingleObserver<String>() {
+        Single.fromCallable(() -> DisasterUtils.getEarthquakeDetails(URL))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new SingleObserver<String>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
 
@@ -149,6 +146,7 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
                     Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
                     BitmapDescriptor marker = BitmapDescriptorFactory.fromBitmap(smallMarker);
                     LatLng coords = new LatLng(JSONCoordinates.getDouble(1), JSONCoordinates.getDouble(0));
+
                     gMap.addMarker(new MarkerOptions().position(coords).title("Your Location").icon(marker));
                     gMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
                     CircleOptions circle = new CircleOptions()
@@ -168,18 +166,10 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
                     gMap.moveCamera(CameraUpdateFactory.zoomBy(3));
                     gMap.setMinZoomPreference(2);
 
-                    zoomInButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            gMap.moveCamera(CameraUpdateFactory.zoomIn());
-                        }
-                    });
-                    zoomOutButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (gMap.getCameraPosition().zoom > 2) {
-                                gMap.moveCamera(CameraUpdateFactory.zoomOut());
-                            }
+                    zoomInButton.setOnClickListener(view -> gMap.moveCamera(CameraUpdateFactory.zoomIn()));
+                    zoomOutButton.setOnClickListener(view -> {
+                        if (gMap.getCameraPosition().zoom > 2) {
+                            gMap.moveCamera(CameraUpdateFactory.zoomOut());
                         }
                     });
                     ArrayList<String> list = new ArrayList<>();
@@ -213,9 +203,11 @@ public class EarthquakeInformationActivity extends AppCompatActivity implements 
 
             @Override
             public void onError(@NonNull Throwable e) {
-
+                e.printStackTrace();
             }
         });
+
+
         //LoaderManager.getInstance(EarthquakeInformationActivity.this).restartLoader(1, queryBundle, this);
     }
 
