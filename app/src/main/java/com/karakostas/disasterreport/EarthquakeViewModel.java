@@ -12,7 +12,6 @@ public class EarthquakeViewModel extends AndroidViewModel {
     double circleRadius;
     String searchQuery = "";
     private DisasterRepository mRepository;
-    private LiveData<List<Earthquake>> mAllEarthquakes;
     private LiveData<List<Earthquake>> mFilteredEarthquakes;
     private MutableLiveData<earthquakeFilter> earthquakeFilter;
 
@@ -24,9 +23,6 @@ public class EarthquakeViewModel extends AndroidViewModel {
 
     }
 
-    public void deleteAll() {
-        mRepository.deleteAll();
-    }
 
     LiveData<List<Earthquake>> getFilteredEarthquakes() {
         return mFilteredEarthquakes;
@@ -48,7 +44,9 @@ public class EarthquakeViewModel extends AndroidViewModel {
     void insert(Earthquake earthquake) {
         mRepository.insertEarthquake(earthquake);
     }
-
+    void insertAll(List<Earthquake> earthquakes){
+        mRepository.insertAllEarthquakes(earthquakes);
+    }
     static class earthquakeFilter {
         final double minMag, maxMag;
         final long startDate, endDate;
