@@ -14,13 +14,13 @@ public interface DisasterDao {
     void insertEarthquake(Earthquake earthquake);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAllEarthquakes(List<Earthquake> earthquakes);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertHurricane(Hurricane hurricane);
 
-    @Query("DELETE FROM earthquake_table")
-    void deleteAll();
-
-    @Query("SELECT * from earthquake_table ORDER BY date DESC ")
-    LiveData<List<Earthquake>> getAllEarthquakes();
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAllHurricanes(List<Hurricane> hurricanes);
 
     @Query("SELECT * from earthquake_table WHERE mag >= :minMag AND mag <= :maxMag AND date >= :startDate AND date <= :endDate " +
             "AND :circleFilterRadius * 111.12 >= distanceFromUser ORDER BY date DESC ")
