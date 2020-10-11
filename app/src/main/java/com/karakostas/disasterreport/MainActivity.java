@@ -153,13 +153,13 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder permissionDialog = new AlertDialog.Builder(MainActivity.this);
             permissionDialog.setMessage("Disaster Report needs to access your location in order to " +
-                    "provide relative distance information of events, location-based notifications and " +
+                    "provide relative distance information of events and " +
                     "precise location search filters. \n\nYour location is not transmitted or collected and is only " +
-                    "used to create local map markers.");
+                    "used to calculate local distances");
             permissionDialog.setTitle("Location Permission");
             permissionDialog.setCancelable(false);
             permissionDialog.setPositiveButton("OK", (dialogInterface, i) -> ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     0));
             permissionDialog.setNegativeButton("EXIT", (dialogInterface, i) -> finish());
             AlertDialog permissionExplanationDialog = permissionDialog.create();

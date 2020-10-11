@@ -1,15 +1,19 @@
 package com.karakostas.disasterreport;
 
+import android.Manifest;
 import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import org.json.JSONArray;
@@ -29,13 +33,14 @@ public class NotificationWorker extends Worker {
     }
     private static final String GROUP_EARTHQUAKE_NOTIFICATION_KEY = "com.karakostas.disasterreport.EARTHQUAKES";
     SharedPreferences pref;
-    SharedPreferences.Editor editor;
     @NonNull
     @Override
     public Result doWork() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            WorkManager.getInstance(getApplicationContext()).cancelUniqueWork("notificationWork");
+        }
         createNotificationChannel();
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = pref.edit();
         double mLongitude = Double.longBitsToDouble(pref.getLong("location_longitude",0));
         double mLatitude = Double.longBitsToDouble(pref.getLong("location_latitude",0));
         float mMaxRadius = pref.getFloat("max_radius_notification_filter",180);
