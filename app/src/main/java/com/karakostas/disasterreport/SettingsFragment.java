@@ -81,7 +81,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         assert notificationPreference != null;
         pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        assert themePreference != null;
+
         themePreference.setOnPreferenceChangeListener((preference, newValue) ->{
             boolean a = Boolean.parseBoolean(newValue.toString());
             if (a){
@@ -109,7 +109,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     permissionDialog.setPositiveButton("OK", (dialogInterface, i) ->
                             requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                                     0));
-                    permissionDialog.setNegativeButton("CANCEL", (dialogInterface, i) -> {});
+                    permissionDialog.setNegativeButton("CANCEL", (dialogInterface, i) -> notificationPreference.setChecked(false));
                     AlertDialog permissionExplanationDialog = permissionDialog.create();
                     permissionExplanationDialog.show();
                     } else {
