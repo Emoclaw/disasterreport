@@ -88,13 +88,14 @@ public class NotificationWorker extends Worker {
         for (int i = mList.size() - 1; i >= 0; i--) {
             if (dao.getEarthquakeById(mList.get(i).getId()) == null) {
                 count++;
-                createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred", count,mList.get(i).getDate(),mList.get(i).getURL());
+                createNotification(mList.get(i).getLocation(), "A " + mList.get(i).getMag() + " earthquake has occurred",
+                        count,mList.get(i).getDate(),mList.get(i).getURL(),mList.get(i).getDistanceFromUser());
                 dao.insertEarthquake(mList.get(i));
             }
         }
         return Result.success();
     }
-    private void createNotification(String location, String title, int id,long time, String URL){
+    private void createNotification(String location, String title, int id,long time, String URL, double distance){
         Intent intent = new Intent(getApplicationContext(), EarthquakeInformationActivity.class);
         //Inflate the backstack so that we can return to MainActivity
         intent.putExtra("detailsURL", URL);
@@ -107,7 +108,7 @@ public class NotificationWorker extends Worker {
         Notification earthquakeNotification =  new NotificationCompat.Builder(getApplicationContext(),"1")
                 .setSmallIcon(R.drawable.mag_icon)
                 .setContentTitle(title)
-                .setContentText(location)
+                .setContentText(location + " - " + ((int)distance) + " km away")
                 .setWhen(time)
                 .setSubText("Disaster Report")
                 .setContentIntent(resultPendingIntent)
