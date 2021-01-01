@@ -68,7 +68,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
         }
         String status = hurricane.isActive()?"(Active)":"(Inactive)";
         holder.nameTextView.setText(hurricane.getName());
-        holder.dateTextView.setText(hurricane.getTimeList().get(0));
+        holder.dateTextView.setText(DisasterUtils.timeToString(hurricane.getStartTime()));
         holder.speedTextView.setTextColor(ContextCompat.getColor(mContext,color));
         holder.categoryTextView.setText(category + " " + status);
         //holder.speedUnitTextView.setTextColor(ContextCompat.getColor(mContext,color));
@@ -127,14 +127,14 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
 
                 //Map info
                 Hurricane hurricane = (Hurricane) mapView.getTag();
-                gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0))));
+                gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat())));
                 //Change marker icon based on whether Night Mode is enabled
                 int drawable = mAdapter.nightMode ? R.drawable.ic_hurricane_orange : R.drawable.ic_hurricane;
                 Glide.with(mContext).asBitmap().load(drawable).into(new CustomTarget<Bitmap>(wh,wh) {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         gMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(hurricane.getLatitudeList().get(0), hurricane.getLongitudeList().get(0)))
+                                .position(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat()))
                                 .icon(BitmapDescriptorFactory.fromBitmap(resource))
                                 .anchor(0.5f,0.5f));
                     }
@@ -145,9 +145,9 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
                     }
                 });
                 PolylineOptions polylineOptions = new PolylineOptions();
-                polylineOptions.color(ContextCompat.getColor(mContext,R.color.colorSecondary)).width(5);
-                for (int i=0; i<hurricane.getLongitudeList().size();i++){
-                    polylineOptions.add(new LatLng(hurricane.getLatitudeList().get(i),hurricane.getLongitudeList().get(i)));
+                polylineOptions.color(ContextCompat.getColor(mContext,R.color.colorSecondary)).width(15);
+                for (int i=0; i<hurricane.getDataPointsList().size();i++){
+                    polylineOptions.add(new LatLng(hurricane.getDataPointsList().get(i).getLat(),hurricane.getDataPointsList().get(i).getLon()));
                 }
                 Polyline polyline = gMap.addPolyline(polylineOptions);
                 //Set map back to normal, since it's set to none when recycled

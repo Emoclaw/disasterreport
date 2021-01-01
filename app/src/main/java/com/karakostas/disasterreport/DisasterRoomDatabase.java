@@ -8,28 +8,16 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Earthquake.class, Hurricane.class}, version = 7, exportSchema = false)
+@Database(entities = {Earthquake.class, Hurricane.class}, version = 9, exportSchema = false)
 public abstract class DisasterRoomDatabase extends RoomDatabase {
     private static DisasterRoomDatabase INSTANCE;
-    private static RoomDatabase.Callback sRoomDatabaseCallback =
-            new RoomDatabase.Callback() {
-
-                @Override
-                public void onOpen(@NonNull SupportSQLiteDatabase db) {
-                    super.onOpen(db);
-                    new PopulateDbAsync(INSTANCE).execute();
-                }
-            };
-
     public static DisasterRoomDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (DisasterRoomDatabase.class) {
                 if (INSTANCE == null) {
-                    // Create database here
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             DisasterRoomDatabase.class, "disaster_database")
                             .fallbackToDestructiveMigration()
-                            .addCallback(sRoomDatabaseCallback)
                             .build();
                 }
             }
@@ -38,22 +26,4 @@ public abstract class DisasterRoomDatabase extends RoomDatabase {
     }
 
     public abstract DisasterDao earthquakeDao();
-
-    private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
-
-        private final DisasterDao mDao;
-
-        PopulateDbAsync(DisasterRoomDatabase db) {
-            mDao = db.earthquakeDao();
-        }
-
-        @Override
-        protected Void doInBackground(final Void... params) {
-            // Start the app with a clean database every time.
-            // Not needed if you only populate the database
-            // when it is first created
-            // mDao.deleteAll();
-            return null;
-        }
-    }
 }

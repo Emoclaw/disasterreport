@@ -33,7 +33,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements EarthquakeFiltersDialog.EarthquakeFiltersDialogCompletedListener {
-    static final boolean DEBUG_MODE = true;
+    static final boolean DEBUG_MODE = false;
     private SharedPreferences earthquakePrefs;
     private SharedPreferences.Editor earthquakePrefEditor;
     SharedPreferences pref;

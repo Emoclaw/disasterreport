@@ -35,7 +35,7 @@ public class DisasterRepository {
 
     public void insertHurricane(Hurricane hurricane) {
             if (disasterDao.getHurricaneById(hurricane.getSID()) == null ||
-                    disasterDao.getHurricaneById(hurricane.getSID()).getLatitudeList().size() != hurricane.getLatitudeList().size())
+                    disasterDao.getHurricaneById(hurricane.getSID()).getDataPointsList().size() != hurricane.getDataPointsList().size())
                 disasterDao.insertHurricane(hurricane);
     }
     public void insertAllHurricanes(List<Hurricane> hurricanes) {

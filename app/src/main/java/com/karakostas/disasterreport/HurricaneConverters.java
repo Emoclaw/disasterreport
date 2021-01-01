@@ -1,35 +1,33 @@
 package com.karakostas.disasterreport;
 
 import androidx.room.TypeConverter;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HurricaneConverters {
     @TypeConverter
-    public static ArrayList<String> fromString(String value) {
-        Type listType = new TypeToken<ArrayList<String>>() {}.getType();
-        return new Gson().fromJson(value, listType);
+    public static ArrayList<DataPoints> fromString(String value) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return new ArrayList<>(Arrays.asList(mapper.readValue(value, DataPoints[].class)));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @TypeConverter
-    public static String fromArrayList(ArrayList<String> list) {
-        Gson gson = new Gson();
-        String json = gson.toJson(list);
-        return json;
-    }
-
-    @TypeConverter
-    public static String fromFloatArrayList(ArrayList<Float> list) {
-        Gson gson = new Gson();
-        String json = gson.toJson(list);
-        return json;
-    }
-    @TypeConverter
-    public static ArrayList<Float> fromFloatString(String value){
-        Type listType = new TypeToken<ArrayList<Float>>() {}.getType();
-        return new Gson().fromJson(value,listType);
+    public static String fromDataPointsArrayList(ArrayList<DataPoints> list) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(list);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -2,13 +2,14 @@ package com.karakostas.disasterreport;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverters;
+import androidx.room.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.ArrayList;
-import java.util.List;
+
+@JsonDeserialize(using = HurricaneDeserializer.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity(tableName = "hurricane_table")
 public class Hurricane {
     @PrimaryKey
@@ -16,30 +17,26 @@ public class Hurricane {
     @NonNull
     String SID;
     String name;
-    String time;
+    long startTime;
     boolean isActive;
     float lastSpeed;
     float averageSpeed;
-    @TypeConverters(HurricaneConverters.class)
-    ArrayList<String> timeList = new ArrayList<>();
-    @TypeConverters(HurricaneConverters.class)
-    ArrayList<Float> latitudeList = new ArrayList<>();
-    @TypeConverters(HurricaneConverters.class)
-    ArrayList<Float> longitudeList = new ArrayList<>();
-    @TypeConverters(HurricaneConverters.class)
-    ArrayList<Float> speedList = new ArrayList<>();
 
 
-    public Hurricane(@NonNull String SID, String name, ArrayList<Float> latitudeList, ArrayList<Float> longitudeList, ArrayList<String> timeList, ArrayList<Float> speedList, boolean isActive, float averageSpeed){
+    public ArrayList<DataPoints> getDataPointsList() {
+        return dataPointsList;
+    }
+    @TypeConverters(HurricaneConverters.class)
+    ArrayList<DataPoints> dataPointsList;
+
+
+    public Hurricane(@NonNull String SID, String name, ArrayList<DataPoints> dataPointsList, boolean isActive, float averageSpeed) {
         this.SID = SID;
-        this.latitudeList.addAll(latitudeList);
+        this.dataPointsList = dataPointsList;
         this.name = name;
-        this.longitudeList.addAll(longitudeList);
-        this.timeList.addAll(timeList);
-        this.time = timeList.get(0);
-        this.speedList.addAll(speedList);
+        this.startTime = dataPointsList.get(0).getTime();
         this.isActive = isActive;
-        lastSpeed = speedList.get(speedList.size()-1);
+        lastSpeed = dataPointsList.get(dataPointsList.size() - 1).getSpeed();
         this.averageSpeed = averageSpeed;
     }
 
@@ -52,20 +49,11 @@ public class Hurricane {
         return name;
     }
 
-    public ArrayList<Float> getLatitudeList() {
-        return latitudeList;
-    }
 
-    public ArrayList<Float> getLongitudeList() {
-        return longitudeList;
-    }
-
-    public List<String> getTimeList() {
-        return timeList;
-    }
     public boolean isActive() {
         return isActive;
     }
+
     public static DiffUtil.ItemCallback<Hurricane> DIFF_CALLBACK = new DiffUtil.ItemCallback<Hurricane>() {
         @Override
         public boolean areItemsTheSame(@NonNull Hurricane oldItem, @NonNull Hurricane newItem) {
@@ -74,7 +62,7 @@ public class Hurricane {
 
         @Override
         public boolean areContentsTheSame(@NonNull Hurricane oldItem, @NonNull Hurricane newItem) {
-            return oldItem.getLatitudeList().size() == newItem.getLatitudeList().size();
+            return oldItem.getDataPointsList().size() == newItem.getDataPointsList().size();
         }
     };
 
@@ -86,11 +74,40 @@ public class Hurricane {
         return lastSpeed;
     }
 
-    public ArrayList<Float> getSpeedList() {
-        return speedList;
+    public long getStartTime() {
+        return startTime;
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+
+class DataPoints {
+    public float getLat() {
+        return lat;
     }
 
-    public String getTime() {
+    public float getLon() {
+        return lon;
+    }
+
+    public long getTime() {
         return time;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    float lat;
+    float lon;
+    long time;
+    int speed;
+    private DataPoints(){}
+
+    public DataPoints(float lat, float lon, long time, int speed) {
+        this.lat = lat;
+        this.lon = lon;
+        this.time = time;
+        this.speed = speed;
     }
 }
