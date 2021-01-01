@@ -127,14 +127,14 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
 
                 //Map info
                 Hurricane hurricane = (Hurricane) mapView.getTag();
-                gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat())));
+                gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLon())));
                 //Change marker icon based on whether Night Mode is enabled
                 int drawable = mAdapter.nightMode ? R.drawable.ic_hurricane_orange : R.drawable.ic_hurricane;
                 Glide.with(mContext).asBitmap().load(drawable).into(new CustomTarget<Bitmap>(wh,wh) {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         gMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat()))
+                                .position(new LatLng(hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLat(), hurricane.getDataPointsList().get(hurricane.getDataPointsList().size()-1).getLon()))
                                 .icon(BitmapDescriptorFactory.fromBitmap(resource))
                                 .anchor(0.5f,0.5f));
                     }
@@ -145,7 +145,7 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
                     }
                 });
                 PolylineOptions polylineOptions = new PolylineOptions();
-                polylineOptions.color(ContextCompat.getColor(mContext,R.color.colorSecondary)).width(15);
+                polylineOptions.color(ContextCompat.getColor(mContext,R.color.colorSecondary)).width(5);
                 for (int i=0; i<hurricane.getDataPointsList().size();i++){
                     polylineOptions.add(new LatLng(hurricane.getDataPointsList().get(i).getLat(),hurricane.getDataPointsList().get(i).getLon()));
                 }
