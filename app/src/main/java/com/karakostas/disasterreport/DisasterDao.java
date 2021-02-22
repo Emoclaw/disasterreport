@@ -33,7 +33,7 @@ public interface DisasterDao {
     @Query("SELECT * from earthquake_table WHERE id == :id")
     Earthquake getEarthquakeById(String id);
 
-    @Query("SELECT * from hurricane_table ORDER BY startTime DESC")
+    @Query("SELECT * from hurricane_table ORDER BY firstActive DESC")
     LiveData<List<Hurricane>> getHurricanes();
 
     @Query("SELECT * from hurricane_table WHERE SID == :id")

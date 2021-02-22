@@ -20,6 +20,8 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
+import java.util.ArrayList;
+
 public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.ViewHolder> {
     boolean nightMode = false;
     private Context mContext;
@@ -47,32 +49,35 @@ public class HurricaneAdapter extends ListAdapter<Hurricane, HurricaneAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Hurricane hurricane = getItem(position);
+        ArrayList<DataPoints> dataPointsArrayList = hurricane.getDataPointsList();
         int color;
         String category;
-        float speed = hurricane.getAverageSpeed();
-        if (speed < 153){
-            color = R.color.category_1;
-            category = "Cat. 1";
-        } else if (speed < 177) {
-            color = R.color.category_2;
-            category = "Cat. 2";
-        } else if (speed < 208) {
-            color = R.color.category_3;
-            category = "Cat. 3";
-        } else if (speed < 251) {
-            color = R.color.category_4;
-            category = "Cat. 4";
-        } else {
-            color = R.color.category_5;
-            category = "Cat. 5";
+        float currentSpeed = (dataPointsArrayList.get(dataPointsArrayList.size()-1).getWindSpeed());
+        switch (dataPointsArrayList.get(dataPointsArrayList.size()-1).getCat()) {
+            case 2:
+                color = R.color.category_2;
+                break;
+            case 3:
+                color = R.color.category_3;
+                break;
+            case 4:
+                color = R.color.category_4;
+                break;
+            case 5:
+                color = R.color.category_5;
+                break;
+            default:
+                color = R.color.category_1;
+                break;
         }
+        category = "Cat. " + dataPointsArrayList.get(dataPointsArrayList.size()-1).getCat();
         String status = hurricane.isActive()?"(Active)":"(Inactive)";
         holder.nameTextView.setText(hurricane.getName());
-        holder.dateTextView.setText(DisasterUtils.timeToString(hurricane.getStartTime()));
+        holder.dateTextView.setText(DisasterUtils.timeToString(hurricane.getFirstActive() * 1000));
         holder.speedTextView.setTextColor(ContextCompat.getColor(mContext,color));
         holder.categoryTextView.setText(category + " " + status);
         //holder.speedUnitTextView.setTextColor(ContextCompat.getColor(mContext,color));
-        holder.speedTextView.setText(String.format("%.1f",speed));
+        holder.speedTextView.setText(currentSpeed == -1?"n/a":String.format("%.1f",currentSpeed * 1.852));
         holder.mapView.setTag(getItem(position));
         holder.setMapSettings();
     }
