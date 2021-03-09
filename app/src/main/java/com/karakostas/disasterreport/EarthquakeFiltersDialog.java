@@ -32,6 +32,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.*;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -392,7 +393,7 @@ public class EarthquakeFiltersDialog extends DialogFragment implements DatePicke
         infoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog alertDialog = new AlertDialog.Builder(mContext, R.style.datePicker).create();
+                AlertDialog alertDialog = new MaterialAlertDialogBuilder(mContext, R.style.datePicker).create();
                 alertDialog.setTitle("Weird Map Circle");
                 alertDialog.setMessage("Because the Earth is an imperfect sphere and the map is a flat rectangle, as the circle becomes " +
                         "bigger and approaches the poles, it becomes distorted. \n" +

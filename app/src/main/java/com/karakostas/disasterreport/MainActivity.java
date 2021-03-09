@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
@@ -28,7 +29,9 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import com.google.android.gms.location.*;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.transition.MaterialFade;
 
 import java.util.concurrent.TimeUnit;
 
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements EarthquakeFilters
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder permissionDialog = new AlertDialog.Builder(MainActivity.this);
+            MaterialAlertDialogBuilder permissionDialog = new MaterialAlertDialogBuilder(MainActivity.this);
             permissionDialog.setMessage("Disaster Report needs to access your location in order to " +
                     "provide relative distance information of events and " +
                     "precise location search filters. \n\nYour location is not transmitted or collected and is only " +
